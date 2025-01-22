@@ -27,8 +27,8 @@ export function EDA() {
             let edaResult = {
                 "correlationMatrixPlot": imageComponent(edaData.correlationMatrixPlot),
                 "zScorePlot": imageComponent(edaData.zScorePlot),
-                "pairplotPlot": imageComponent(edaData.pairplotPlot),
-                "classDistribution": imageComponent(edaData.classDistribution)
+                "pairplotPlot": imageComponent(edaData.pairplotPlot)
+                //"classDistribution": imageComponent(edaData.classDistribution)
             }
             let dataDistributionPlots = {}
             for (const ddPlot in edaData.dataDistributionPlots) {
@@ -91,11 +91,6 @@ export function EDA() {
             <div class="pairplot-plot">
                 {resultEDA && resultEDA.pairplotPlot ? <p>Pairplot</p> : ''}
                 {resultEDA && resultEDA.pairplotPlot ? resultEDA.pairplotPlot : ''}
-            </div>
-
-            <div class="class-distribution-plot">
-                {resultEDA && resultEDA.classDistribution ? <p>Class Distribution</p> : ''}
-                {resultEDA && resultEDA.classDistribution ? resultEDA.classDistribution : ''}
             </div>
         </div>
     );

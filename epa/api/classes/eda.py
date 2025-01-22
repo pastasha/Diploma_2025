@@ -45,15 +45,18 @@ class ExploratoryDataAnalysis:
     @staticmethod
     def checkIfImgExists(root_folder, img_path):
         imgExists = False
-        fullImgPath = os.path.join(root_folder, img_path)
         if (os.path.isfile(os.path.join(root_folder, img_path))):
             imgExists = True
         return imgExists
 
     def prepareData(self, dataframe):
-        requiredColumns = ["Location", "Day", "Hour","AQI", "PM2.5", "PM10", "O3", "CO", "SO2", "NO2", "AQI_Class"]
-        processedDf = dataframe.loc[:, dataframe.columns.intersection(requiredColumns)]
-        return processedDf
+        newDf = dataframe[['Location', 'Day', 'Hour', 'PM2.5', 'PM10', 'O3', 'CO', 'SO2', 'NO2']].copy()
+        # Label encoding
+        le = LabelEncoder()
+        newDf['Location'] = le.fit_transform(newDf['Location'])
+        newDf['Hour'] = le.fit_transform(newDf['Hour'])
+        newDf.fillna(newDf.mean(), inplace=True)
+        return newDf
 
     @staticmethod
     def generateDataDistributionPlot(self, dataframe, value, user_id, root_folder):
@@ -76,7 +79,7 @@ class ExploratoryDataAnalysis:
             img_path = self.generateImgFullPath(user_id, EMISSION_INDEX_FOLDER, img_name)
             if (self.checkIfImgExists(root_folder, img_path) == False):
                 plt.figure(figsize=(13, 4))
-                sns.boxplot(data=dataframe, x="AQI_Class", y=value)
+                sns.boxplot(data=dataframe, x="Location", y=value)
                 plt.title(value + " Emissions")
                 # save result
                 img_path = self.saveImageToStaticFolder(user_id, root_folder, EMISSION_INDEX_FOLDER, img_name)
@@ -90,12 +93,6 @@ class ExploratoryDataAnalysis:
         try:
             img_path = self.generateImgFullPath(user_id, PLOTS_FOLDER, CORRELATION_MATRIX_FILE_NAME)
             if (self.checkIfImgExists(root_folder, img_path) == False):
-                dataframe.drop(columns = ['Filename'], inplace=True)
-                # Label encoding
-                le = LabelEncoder()
-                dataframe['Location'] = le.fit_transform(dataframe['Location'])
-                dataframe['Hour'] = le.fit_transform(dataframe['Hour'])
-                dataframe['AQI_Class'] = le.fit_transform(dataframe['AQI_Class'])
                 sns.heatmap(dataframe.corr())
                 # save result
                 img_path = self.saveImageToStaticFolder(user_id, root_folder, PLOTS_FOLDER, CORRELATION_MATRIX_FILE_NAME)
@@ -129,7 +126,7 @@ class ExploratoryDataAnalysis:
         try:
             img_path = self.generateImgFullPath(user_id, PLOTS_FOLDER, PAIRPLOT_FILE_NAME)
             if (self.checkIfImgExists(root_folder, img_path) == False):
-                plot = sns.pairplot(dataframe, hue="AQI_Class")
+                plot = sns.pairplot(dataframe, hue="Location")
                 fig = plot.fig
                 # save result
                 img_path = self.saveImageToStaticFolder(user_id, root_folder, PLOTS_FOLDER, PAIRPLOT_FILE_NAME)
@@ -167,24 +164,25 @@ class ExploratoryDataAnalysis:
             print(f"-{type(error).__name__}: {error}")
 
     def __init__(self, user_id, customer_folder, root_folder):
-        dataframe = self.getCustomerData(customer_folder)
+        rawDf = self.getCustomerData(customer_folder)
+        dataframe = self.prepareData(rawDf)
         values = ["PM2.5", "PM10", "O3", "CO", "SO2", "NO2"]
         self.dataDistributionPlots = {}
         self.emissionIndexPlots = {}
         for value in values:
             # generate data distribution plot
             self.dataDistributionPlots[value] = self.generateDataDistributionPlot(self, dataframe, value, user_id, root_folder)
-            # generate emission index plot
-            self.emissionIndexPlots[value] = self.generateEmissionIndexPlot(self, dataframe, value, user_id, root_folder)
         # generate correlation matrix plot
         self.correlationMatrixPlot = self.generateCorrelationMatrixPlot(self, dataframe, user_id, root_folder)
         # generate z-scope plot
         self.zScorePlot = self.generateZScorePlot(self, dataframe, user_id, root_folder)
+        for value in values:
+            # generate emission index plot
+            self.emissionIndexPlots[value] = self.generateEmissionIndexPlot(self, dataframe, value, user_id, root_folder)
         # generate pairplot plot
-        dataframe = self.prepareData(dataframe)
         self.pairplotPlot = self.generatePairplotPlot(self, dataframe, user_id, root_folder)
         # generate class distribution plot
-        self.classDistribution = self.generateClassDistributionPlot(self, dataframe, user_id, root_folder)
+        #self.classDistribution = self.generateClassDistributionPlot(self, dataframe, user_id, root_folder)
         plt.close("all")
 
 

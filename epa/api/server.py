@@ -1,9 +1,7 @@
 # Import flask and datetime module for showing date and time
 import os
-import pickle
 import psycopg2
 import pandas as pd
-from datetime import datetime
 from werkzeug.utils import secure_filename
 from flask import Flask, request, jsonify, make_response
 from utilities import *
@@ -96,8 +94,7 @@ def start_eda():
             "emissionIndexPlots": edaObject.emissionIndexPlots,
             "correlationMatrixPlot": edaObject.correlationMatrixPlot,
             "zScorePlot": edaObject.zScorePlot,
-            "pairplotPlot": edaObject.pairplotPlot,
-            "classDistribution": edaObject.classDistribution
+            "pairplotPlot": edaObject.pairplotPlot
         }
         success = True
     except Exception as e:
@@ -120,8 +117,11 @@ def predict():
         user_df = pd.DataFrame(columns=col_names)
         user_df = get_data_from_db(get_statement, connection, cursor, user_df, col_names)[0][0]
         customer_folder = user_df['files_path']
-        predictionObject = Predict(user_id, customer_folder, app.root_path, req["modelID"])
-        predictionResult = predictionObject.predictionResult.tolist()
+        predictionObject = Predict(user_id, customer_folder, app.root_path, req["modelType"], req["modelID"])
+        predictionResult = {
+            "predictionResult": predictionObject.predictionResult.tolist(),
+            "predictedCategories": predictionObject.predictedCategories
+        }
         success = True
     except Exception as e:
         print(f"Couldn't process prediction: {e}")
