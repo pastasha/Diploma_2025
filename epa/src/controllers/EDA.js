@@ -27,8 +27,8 @@ export function EDA() {
             let edaResult = {
                 "correlationMatrixPlot": imageComponent(edaData.correlationMatrixPlot),
                 "zScorePlot": imageComponent(edaData.zScorePlot),
-                "pairplotPlot": imageComponent(edaData.pairplotPlot),
-                "classDistribution": imageComponent(edaData.classDistribution)
+                "pairplotPlot": imageComponent(edaData.pairplotPlot)
+                //"classDistribution": imageComponent(edaData.classDistribution)
             }
             let dataDistributionPlots = {}
             for (const ddPlot in edaData.dataDistributionPlots) {
@@ -41,14 +41,16 @@ export function EDA() {
             }
             edaResult.emissionIndexPlots = emissionIndexPlots;
             setResultEDA(edaResult);
+
+            document.querySelector(".start-eda-button").value = 'Restart EDA';
+            document.getElementById("predict").classList.remove("hidden");
         }
     }; 
 
     return (
         <div>
             <p>Exploratory Data Analysis, simply referred to as EDA, is the step where you understand the data in detail.</p>
-            <div class="start-eda-button">
-            <button className="standard-upload" onClick={handleClick}>
+            <button className="standard-upload start-eda-button" onClick={handleClick}>
                 Start EDA
             </button>
 
@@ -90,12 +92,6 @@ export function EDA() {
                 {resultEDA && resultEDA.pairplotPlot ? <p>Pairplot</p> : ''}
                 {resultEDA && resultEDA.pairplotPlot ? resultEDA.pairplotPlot : ''}
             </div>
-
-            <div class="class-distribution-plot">
-                {resultEDA && resultEDA.classDistribution ? <p>Class Distribution</p> : ''}
-                {resultEDA && resultEDA.classDistribution ? resultEDA.classDistribution : ''}
-            </div>
-        </div>
         </div>
     );
 };

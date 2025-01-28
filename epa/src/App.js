@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { HashRouter } from "react-router-dom";
 import Home from "./controllers/Home";
 import { EDA } from "./controllers/EDA";
-import Contact  from "./controllers/Contact";
+import { Predict }  from "./controllers/Predict";
 import { Session } from "./controllers/Session";
 import { ReactComponent as Logo} from './icons/epa-logo.svg';  // eslint-disable-next-line 
 import './styles/App.css';
@@ -53,7 +53,7 @@ render() {
         <section>
           <div class="section-wrapper hidden" id="predict">
             <h1>Predict</h1>
-            <Contact />
+            <Predict />
           </div>
         </section>
       </main>

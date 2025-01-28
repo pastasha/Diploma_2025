@@ -1,0 +1,29 @@
+.one-row-select-wrapper{
+    display: table;
+    width: 100%; /*Optional*/
+    table-layout: fixed; /*Optional*/
+    border-spacing: 5px; /*Optional*/
+
+    .one-row-select {
+        display: table-cell;
+    }
+
+    .model-select {
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        background: rgba(255, 255, 255);
+        border: 1px solid currentColor;
+        border-radius: 4px;
+        cursor: pointer;
+        font: inherit;
+        min-height: 48px;
+        min-width: 48px;
+        padding: 30px;
+        margin: 5px;
+    }
+
+    .model-select-type {
+        padding: 20px;
+    }
+}

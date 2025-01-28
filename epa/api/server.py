@@ -1,13 +1,12 @@
 # Import flask and datetime module for showing date and time
 import os
-import pickle
 import psycopg2
 import pandas as pd
-from datetime import datetime
 from werkzeug.utils import secure_filename
 from flask import Flask, request, jsonify, make_response
 from utilities import *
-from eda import ExploratoryDataAnalysis
+from classes.eda import ExploratoryDataAnalysis
+from classes.predict import Predict
 
 # Initializing flask app
 app = Flask(__name__)
@@ -95,8 +94,7 @@ def start_eda():
             "emissionIndexPlots": edaObject.emissionIndexPlots,
             "correlationMatrixPlot": edaObject.correlationMatrixPlot,
             "zScorePlot": edaObject.zScorePlot,
-            "pairplotPlot": edaObject.pairplotPlot,
-            "classDistribution": edaObject.classDistribution
+            "pairplotPlot": edaObject.pairplotPlot
         }
         success = True
     except Exception as e:
@@ -109,25 +107,29 @@ def start_eda():
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    data = request.json
-    with open('../../ml-models/classification/serialized/decisionTreeModel.pkl', 'rb') as f:
-        model = pickle.load(f)
-    # Пример: предположим, что данные приходят в виде списка
-    prediction = model.predict([data['features']])
-
-    return jsonify({'prediction': prediction.tolist()})
+    success = False
+    predictionResult = None
+    try:
+        req = request.get_json(force=True)
+        user_id = request.cookies.get('user_id')
+        get_statement = "SELECT * from " + USER_TABLE + " WHERE user_id='" + user_id + "'"
+        col_names = get_column_names(USER_TABLE, cursor)
+        user_df = pd.DataFrame(columns=col_names)
+        user_df = get_data_from_db(get_statement, connection, cursor, user_df, col_names)[0][0]
+        customer_folder = user_df['files_path']
+        predictionObject = Predict(user_id, customer_folder, app.root_path, req["modelType"], req["modelID"])
+        predictionResult = {
+            "predictionResult": predictionObject.predictionResult.tolist(),
+            "predictedCategories": predictionObject.predictedCategories
+        }
+        success = True
+    except Exception as e:
+        print(f"Couldn't process prediction: {e}")
     
-
-# Route for seeing a data
-@app.route('/data')
-def get_time():
-    # Returning an api for showing in  reactjs
-    return {
-        'Name':"tesm", 
-        "Age":"22",
-        "Date":datetime.now(), 
-        "programming":"python"
-    }
+    return jsonify({
+        "success": success,
+        "data": predictionResult
+    })
 
 
 # Running app
