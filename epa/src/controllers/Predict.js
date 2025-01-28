@@ -12,7 +12,7 @@ export function Predict() {
         let modelSelect = document.getElementsByClassName('model-select');
         for(let index = 0 ; index < modelSelect.length ; ++index) {
             modelSelect[index].style.background='white';
-            event.currentTarget.style.borderColor='black';
+            modelSelect[index].style.borderColor='black';
         }
         event.currentTarget.style.background='#deffde';
         event.currentTarget.style.borderColor='green';
@@ -27,7 +27,7 @@ export function Predict() {
         let modelSelect = document.getElementsByClassName('model-select-type');
         for(let index = 0 ; index < modelSelect.length ; ++index) {
             modelSelect[index].style.background='white';
-            event.currentTarget.style.borderColor='black';
+            modelSelect[index].style.borderColor='black';
         }
         event.currentTarget.style.background='#deffde';
         event.currentTarget.style.borderColor='green';
@@ -45,7 +45,7 @@ export function Predict() {
         let response = await fetch('/predict',
             {
                 method: 'post',
-                body: JSON.stringify(data),
+                body: JSON.stringify(data)
             }
         );
         let res = await response.json();
