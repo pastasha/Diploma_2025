@@ -166,7 +166,7 @@ export function Predict() {
 
             {modelID && modelType && predictionResult ? 
                 <div class="one-row-select-wrapper">
-                    <button className="model-select model-select-type" onClick={downloadDf}>
+                    <button className="standard-upload" onClick={downloadDf}>
                         Download CSV report
                     </button>
                 </div>
