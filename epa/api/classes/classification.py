@@ -8,6 +8,7 @@ import pandas as pd
 import numpy as np
 import pickle
 import warnings
+import shutil
 import os
 
 warnings.filterwarnings('ignore')
@@ -149,15 +150,19 @@ class Classification:
                 print(f"- {type(error).__name__}: {error}")
 
     @staticmethod
-    def extendDataframe(self, root_folder, prediction, predictedCategories, dataframe, user_id, modelID):
+    def extendDataframe(root_folder, prediction, predictedCategories, dataframe, user_id, modelID):
         try:
             extendedDF = dataframe.copy()
             extendedDF['AQI'] = prediction
             extendedDF['AQI_Ctegories'] = predictedCategories
             file_path = STATIC_FOLDER + user_id + CLASSIFICATION_FOLDER + modelID
             os.makedirs(os.path.join(root_folder, file_path), exist_ok=True)
-            extendedDF.to_csv(os.path.join(file_path, secure_filename(CLASSIFICATION_REPORT_FILE_NAME)))
-            return extendedDF
+            full_path = os.path.join(file_path, secure_filename(CLASSIFICATION_REPORT_FILE_NAME))
+            extendedDF.to_csv(full_path)
+            return {
+                "extendedDF": extendedDF,
+                "fullPath": full_path
+            }
         except Exception as error:
                 print("- extendDataframe error:")
                 print(f"- {type(error).__name__}: {error}")
@@ -261,32 +266,43 @@ class Classification:
             print(f"-{type(error).__name__}: {error}")
 
     def __init__(self, user_id, customer_folder, root_folder, modelID):
-        # Get customer data
-        dataframe = self.getCustomerData(customer_folder)
-        strLocation = dataframe['Location'].copy()
-        processedDf = self.prepareData(dataframe)
-        # Data scaling
-        scaledData = self.scaleData(processedDf, modelID)
-        # Call serialized model
-        model = self.callModel(root_folder, modelID)
-        # Predict results
-        prediction = ''
-        if (modelID == 'decisiontree'):
-            predict_proba = self.predictProba(model, scaledData)
-            prediction = np.argmax(predict_proba, axis=1)
-        elif (self.isKerasModel(modelID)):
-            prediction = self.predict(model, scaledData)
-            prediction = np.argmax(prediction, axis=1)
-        else:
-            prediction = self.predict(model, scaledData)
-        predictedCategories = self.classificationResult(prediction, modelID)
-        extendedDf = self.extendDataframe(self, root_folder, prediction, predictedCategories, processedDf, user_id, modelID)
-        self.correlationMatrix = self.generateCorrelationMatrixPlot(self, extendedDf, user_id, root_folder, modelID)
-        self.dataOverview = self.generateDataOverviewPlot(self, extendedDf, user_id, root_folder, modelID)
-        self.aqiClasses = self.generateAQIClassesPlot(self, extendedDf, user_id, root_folder, modelID)
-        self.aqiByLocation = self.generateAQIByLocationPlot(self, extendedDf, user_id, root_folder, modelID, strLocation)
-        self.aqiByMonth = self.generateAQIByMonthPlot(self, extendedDf, user_id, root_folder, modelID)
-        plt.close("all")
+        try:
+            # Get customer data
+            dataframe = self.getCustomerData(customer_folder)
+            strLocation = dataframe['Location'].copy()
+            processedDf = self.prepareData(dataframe)
+            # Data scaling
+            scaledData = self.scaleData(processedDf, modelID)
+            # Call serialized model
+            model = self.callModel(root_folder, modelID)
+            # Predict results
+            prediction = ''
+            if (modelID == 'decisiontree'):
+                predict_proba = self.predictProba(model, scaledData)
+                prediction = np.argmax(predict_proba, axis=1)
+            elif (self.isKerasModel(modelID)):
+                prediction = self.predict(model, scaledData)
+                prediction = np.argmax(prediction, axis=1)
+            else:
+                prediction = self.predict(model, scaledData)
+            predictedCategories = self.classificationResult(prediction, modelID)
+            extendedDfObj = self.extendDataframe(root_folder, prediction, predictedCategories, processedDf, user_id, modelID)
+            extendedDf = extendedDfObj["extendedDF"]
+            self.correlationMatrix = self.generateCorrelationMatrixPlot(self, extendedDf, user_id, root_folder, modelID)
+            self.dataOverview = self.generateDataOverviewPlot(self, extendedDf, user_id, root_folder, modelID)
+            self.aqiClasses = self.generateAQIClassesPlot(self, extendedDf, user_id, root_folder, modelID)
+            self.aqiByLocation = self.generateAQIByLocationPlot(self, extendedDf, user_id, root_folder, modelID, strLocation)
+            self.aqiByMonth = self.generateAQIByMonthPlot(self, extendedDf, user_id, root_folder, modelID)
+            self.extendedDfPath = extendedDfObj["fullPath"]
+            self.extendedDfFull = extendedDf.to_csv()
+            archive_folder = STATIC_FOLDER + user_id + CLASSIFICATION_FOLDER + modelID
+            archive_file_path = archive_folder + '.zip'
+            shutil.make_archive(archive_folder, 'zip', archive_file_path)
+            self.archiveFilePath = archive_file_path
+            plt.close("all")
+        except Exception as error:
+            print("- classification init error")
+            print(f"-{type(error).__name__}: {error}")
 
 
 

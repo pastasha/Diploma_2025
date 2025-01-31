@@ -92,8 +92,7 @@ export function FileUploader() {
             />
 
             {/* File info */}
-            {fileName ? <p>Uploaded file: {fileName}</p> : null}
-            {fileSize ? <p>File size: {fileSize}</p> : null}
+            {fileName ? <p class="pt-3">Uploaded file: {fileName}</p> : null}
 
             {/* Table */}
             <div class="uploaded-file-wrapper">
@@ -107,7 +106,7 @@ export function FileUploader() {
                     </thead>
                     <tbody>
                         {values.map((value, index) => { // eslint-disable-line
-                            if (index <= 4) {
+                            if (index <= 50) {
                                 return (
                                     <tr key={index}> 
                                         {value.map((val, i) => {
@@ -123,7 +122,6 @@ export function FileUploader() {
 
             {/* Analyse button */}
             <div class="analysis-button hidden">
-                <p>Your file was successfuly uploaded. Please confirm data to proceed with analysis.</p>
                 <button className="standard-upload" onClick={handleClickAnalyse}>
                     Confirm data
                 </button>

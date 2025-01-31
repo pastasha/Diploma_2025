@@ -16,7 +16,9 @@ render() {
       <div className="App">
       <link rel="{Logo}"/>
       <header class="header">
-        <h1>Environmental Performance Analyzer</h1>
+        <div class="header-img-wrapper">
+          <h1>Environmental Performance Analyzer</h1>
+        </div>
       </header>
 
       <nav class="sticky navbar fixed-top">

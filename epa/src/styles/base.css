@@ -1,7 +1,7 @@
 :root {
 	--primary: #274472;
 	--secondary: #5885AF;
-	--shades: #c3e0e5;
+	--shades: white;
 	font-family: 'Source Code Pro', monospace;
     color: #203454;
 	line-height: 1.6;
@@ -24,12 +24,16 @@ body {
 	min-height: 100vh;
 }
 
-.header,
+.header-img-wrapper,
 .home,
 .about,
 .portfolio,
 .contact {
 	height: 100vh;
+}
+
+.header-img-wrapper {
+	background-image: url("../images/air.jpg");
 }
 
 .header,
@@ -75,6 +79,7 @@ body {
 .footer {
 	height: 150px;
 	background-color: var(--primary);
+	margin-top: 50px;
 }
 
 .header {

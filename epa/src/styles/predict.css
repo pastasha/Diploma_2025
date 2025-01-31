@@ -27,3 +27,13 @@
         padding: 20px;
     }
 }
+
+.classification-wrapper,
+.regression-wrapper {
+    img {
+        width: 100%;
+    }
+    .aqi-by-time img {
+        width: 50%;
+    }
+}

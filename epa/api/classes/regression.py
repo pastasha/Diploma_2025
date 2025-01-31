@@ -8,6 +8,7 @@ import pandas as pd
 import numpy as np
 import pickle
 import warnings
+import shutil
 import os
 
 warnings.filterwarnings('ignore')
@@ -133,14 +134,18 @@ class Regression:
                 print(f"- {type(error).__name__}: {error}")
 
     @staticmethod
-    def extendDataframe(self, root_folder, prediction, dataframe, user_id, modelID):
+    def extendDataframe(root_folder, prediction, dataframe, user_id, modelID):
         try:
             extendedDF = dataframe.copy()
             extendedDF['AQI'] = prediction
             file_path = STATIC_FOLDER + user_id + REGRESSION_FOLDER + modelID
             os.makedirs(os.path.join(root_folder, file_path), exist_ok=True)
-            extendedDF.to_csv(os.path.join(file_path, secure_filename(REGRESSION_REPORT_FILE_NAME)))
-            return extendedDF
+            full_path = os.path.join(file_path, secure_filename(REGRESSION_REPORT_FILE_NAME))
+            extendedDF.to_csv(full_path)
+            return {
+                "extendedDF": extendedDF,
+                "fullPath": full_path
+            }
         except Exception as error:
                 print("- extendDataframe error:")
                 print(f"- {type(error).__name__}: {error}")
@@ -228,24 +233,43 @@ class Regression:
             print("- generateAQIByTimePlot error")
             print(f"-{type(error).__name__}: {error}")
 
-    def __init__(self, user_id, customer_folder, root_folder, modelID):
-        # Get customer data
-        dataframe = self.getCustomerData(customer_folder)
-        strLocation = dataframe['Location'].copy()
-        processedDf = self.prepareData(dataframe)
-        # Data scaling
-        scaledData = self.scaleData(processedDf, modelID)
-        # Call serialized model
-        model = self.callModel(root_folder, modelID)
-        # Predict results
-        prediction = self.predict(model, scaledData)
-        extendedDf = self.extendDataframe(self, root_folder, prediction, processedDf, user_id, modelID)
-        self.aqiByTime = self.generateAQIByTimePlot(self, extendedDf, user_id, root_folder, modelID)
-        self.correlationMatrix = self.generateCorrelationMatrixPlot(self, extendedDf, user_id, root_folder, modelID)
-        self.aqiByLocation = self.generateAQIByLocationPlot(self, extendedDf, user_id, root_folder, modelID, strLocation)
-        self.aqiPercantage = self.percantageAQIDistributionPlot(self, extendedDf, user_id, root_folder, modelID)
-        plt.close("all")
+    @staticmethod
+    def zipdir(path, ziph):
+        # ziph is zipfile handle
+        for root, dirs, files in os.walk(path):
+            for file in files:
+                ziph.write(os.path.join(root, file), 
+                        os.path.relpath(os.path.join(root, file), 
+                                        os.path.join(path, '..')))
 
+    def __init__(self, user_id, customer_folder, root_folder, modelID):
+        try:
+            # Get customer data
+            dataframe = self.getCustomerData(customer_folder)
+            strLocation = dataframe['Location'].copy()
+            processedDf = self.prepareData(dataframe)
+            # Data scaling
+            scaledData = self.scaleData(processedDf, modelID)
+            # Call serialized model
+            model = self.callModel(root_folder, modelID)
+            # Predict results
+            prediction = self.predict(model, scaledData)
+            extendedDfObj = self.extendDataframe(root_folder, prediction, processedDf, user_id, modelID)
+            extendedDf = extendedDfObj["extendedDF"]
+            self.extendedDfPath = extendedDfObj["fullPath"]
+            self.extendedDfFull = extendedDf.to_csv()
+            self.aqiByTime = self.generateAQIByTimePlot(self, extendedDf, user_id, root_folder, modelID)
+            self.correlationMatrix = self.generateCorrelationMatrixPlot(self, extendedDf, user_id, root_folder, modelID)
+            self.aqiByLocation = self.generateAQIByLocationPlot(self, extendedDf, user_id, root_folder, modelID, strLocation)
+            self.aqiPercantage = self.percantageAQIDistributionPlot(self, extendedDf, user_id, root_folder, modelID)
+            archive_folder = STATIC_FOLDER + user_id + REGRESSION_FOLDER + modelID
+            archive_file_path = archive_folder + '.zip'
+            shutil.make_archive(archive_folder, 'zip', archive_file_path)
+            self.archiveFilePath = archive_file_path
+            plt.close("all")
+        except Exception as error:
+            print("- regression init error")
+            print(f"-{type(error).__name__}: {error}")
 
 
 

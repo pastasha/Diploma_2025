@@ -122,18 +122,24 @@ def predict():
         if (req["modelType"] == "classification"):
             predictionObject = Classification(user_id, customer_folder, app.root_path, req["modelID"])
             predictionResult["type"] = "classification"
+            predictionResult["extendedDfPath"] = predictionObject.extendedDfPath
             predictionResult["dataOverview"] = predictionObject.dataOverview
             predictionResult["aqiClasses"] = predictionObject.aqiClasses
             predictionResult["aqiByLocation"] = predictionObject.aqiByLocation
             predictionResult["aqiByMonth"] = predictionObject.aqiByMonth
             predictionResult["correlationMatrix"] = predictionObject.correlationMatrix
+            predictionResult["extendedDfFull"] = predictionObject.extendedDfFull
+            predictionResult["archiveFilePath"] = predictionObject.archiveFilePath
         elif (req["modelType"] == "regression"):
             predictionObject = Regression(user_id, customer_folder, app.root_path, req["modelID"])
             predictionResult["type"] = "regression"
+            predictionResult["extendedDfPath"] = predictionObject.extendedDfPath
             predictionResult["aqiByLocation"] = predictionObject.aqiByLocation
             predictionResult["aqiPercantage"] = predictionObject.aqiPercantage
             predictionResult["aqiByTime"] = predictionObject.aqiByTime
             predictionResult["correlationMatrix"] = predictionObject.correlationMatrix
+            predictionResult["extendedDfFull"] = predictionObject.extendedDfFull
+            predictionResult["archiveFilePath"] = predictionObject.archiveFilePath
         success = True
     except Exception as e:
         print(f"Couldn't process prediction: {e}")
