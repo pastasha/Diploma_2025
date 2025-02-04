@@ -8,15 +8,17 @@ import pandas as pd
 import numpy as np
 import pickle
 import warnings
-import shutil
 import os
+import sys
+sys.path.append('../')
+
+from helpers.predictHelper import *
+from helpers.dbHelper import *
 
 warnings.filterwarnings('ignore')
-
 matplotlib.use("agg")
 
-KERAS_MODELS = ['dnn', 'lstm', 'mlp']
-DATA_FILE_NAME = "/data.csv"
+
 SERIALIZED_MODELS_FOLDER = "./models"
 REGRESSION_FOLDER = "/regression/"
 STATIC_FOLDER = "static/active_sessions/"
@@ -39,17 +41,6 @@ SERIALIZED_MODELS = {
 
 
 class Regression:
-    @staticmethod
-    def getCustomerData(customer_folder):
-        try:
-            data_path = customer_folder + DATA_FILE_NAME
-            data = os.path.abspath(data_path)
-            dataframe = pd.read_csv(data)
-            return dataframe
-        except Exception as error:
-            print("- getCustomerData error:")
-            print(f"- {type(error).__name__}: {error}")
-
     def prepareData(self, dataframe):
         try:
             processedDf = dataframe[["Location", "Year", "Month", "Day", "Hour", "PM2.5", "PM10", "O3", "CO", "SO2", "NO2"]].copy()
@@ -62,12 +53,6 @@ class Regression:
         except Exception as error:
                 print("- prepareData error:")
                 print(f"- {type(error).__name__}: {error}")
-
-    def isKerasModel(self, modelID):
-        if modelID in KERAS_MODELS:
-            return True;
-        else:
-            return False;
 
     @staticmethod
     def generateImgFullPath(user_id, img_folder, img_name, modelID):
@@ -94,7 +79,7 @@ class Regression:
         try:
             model_path = os.path.join(root_folder, SERIALIZED_MODELS[modelID])
             model = ''
-            if self.isKerasModel(modelID):
+            if isKerasModel(modelID):
                 model = load_model(model_path)
             else:
                 model = pickle.load(open(model_path, 'rb'))
@@ -110,7 +95,7 @@ class Regression:
             X_new_scaled = scaler.fit_transform(dataframe)
             if (modelID == 'lstm'):
                 X_new_scaled = np.expand_dims(X_new_scaled, axis=1)
-            elif (self.isKerasModel(modelID)): 
+            elif (isKerasModel(modelID)): 
                 X_new_scaled = np.expand_dims(X_new_scaled, axis=2)
             return X_new_scaled
         except Exception as error:
@@ -233,19 +218,10 @@ class Regression:
             print("- generateAQIByTimePlot error")
             print(f"-{type(error).__name__}: {error}")
 
-    @staticmethod
-    def zipdir(path, ziph):
-        # ziph is zipfile handle
-        for root, dirs, files in os.walk(path):
-            for file in files:
-                ziph.write(os.path.join(root, file), 
-                        os.path.relpath(os.path.join(root, file), 
-                                        os.path.join(path, '..')))
-
     def __init__(self, user_id, customer_folder, root_folder, modelID):
         try:
             # Get customer data
-            dataframe = self.getCustomerData(customer_folder)
+            dataframe = getCustomerData(customer_folder)
             strLocation = dataframe['Location'].copy()
             processedDf = self.prepareData(dataframe)
             # Data scaling
@@ -262,10 +238,11 @@ class Regression:
             self.correlationMatrix = self.generateCorrelationMatrixPlot(self, extendedDf, user_id, root_folder, modelID)
             self.aqiByLocation = self.generateAQIByLocationPlot(self, extendedDf, user_id, root_folder, modelID, strLocation)
             self.aqiPercantage = self.percantageAQIDistributionPlot(self, extendedDf, user_id, root_folder, modelID)
+            # Create Zip archive
             archive_folder = STATIC_FOLDER + user_id + REGRESSION_FOLDER + modelID
-            archive_file_path = archive_folder + '.zip'
-            shutil.make_archive(archive_folder, 'zip', archive_file_path)
-            self.archiveFilePath = archive_file_path
+            zipDirectory(os.path.join(root_folder, archive_folder))
+            self.archiveFilePath = archive_folder + '.zip'
+
             plt.close("all")
         except Exception as error:
             print("- regression init error")

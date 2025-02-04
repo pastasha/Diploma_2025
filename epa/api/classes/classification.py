@@ -8,15 +8,18 @@ import pandas as pd
 import numpy as np
 import pickle
 import warnings
-import shutil
 import os
+import sys
+sys.path.append('../')
+
+from helpers.predictHelper import *
+from helpers.dbHelper import *
 
 warnings.filterwarnings('ignore')
-
 matplotlib.use("agg")
 
-KERAS_MODELS = ['dnn', 'lstm', 'mlp']
-DATA_FILE_NAME = "/data.csv"
+
+
 SERIALIZED_MODELS_FOLDER = "./models"
 CLASSIFICATION_FOLDER = "/classification/"
 STATIC_FOLDER = "static/active_sessions/"
@@ -40,17 +43,6 @@ SERIALIZED_MODELS = {
 
 
 class Classification:
-    @staticmethod
-    def getCustomerData(customer_folder):
-        try:
-            data_path = customer_folder + DATA_FILE_NAME
-            data = os.path.abspath(data_path)
-            dataframe = pd.read_csv(data)
-            return dataframe
-        except Exception as error:
-            print("- getCustomerData error:")
-            print(f"- {type(error).__name__}: {error}")
-
     def prepareData(self, dataframe):
         try:
             processedDf = dataframe[["Location", "Year", "Month", "Day", "Hour", "PM2.5", "PM10", "O3", "CO", "SO2", "NO2"]].copy()
@@ -63,12 +55,6 @@ class Classification:
         except Exception as error:
                 print("- prepareData error:")
                 print(f"- {type(error).__name__}: {error}")
-
-    def isKerasModel(self, modelID):
-        if modelID in KERAS_MODELS:
-            return True;
-        else:
-            return False;
 
     @staticmethod
     def generateImgFullPath(user_id, img_folder, img_name, modelID):
@@ -95,7 +81,7 @@ class Classification:
         try:
             model_path = os.path.join(root_folder, SERIALIZED_MODELS[modelID])
             model = ''
-            if self.isKerasModel(modelID):
+            if isKerasModel(modelID):
                 model = load_model(model_path)
             else:
                 model = pickle.load(open(model_path, 'rb'))
@@ -109,7 +95,7 @@ class Classification:
             # Data scaling (use the same scaler as during training)
             scaler = MinMaxScaler()
             X_new_scaled = scaler.fit_transform(dataframe)
-            if (self.isKerasModel(modelID)):
+            if (isKerasModel(modelID)):
                 X_new_scaled = np.expand_dims(X_new_scaled, axis=2)
             return X_new_scaled
         except Exception as error:
@@ -268,7 +254,7 @@ class Classification:
     def __init__(self, user_id, customer_folder, root_folder, modelID):
         try:
             # Get customer data
-            dataframe = self.getCustomerData(customer_folder)
+            dataframe = getCustomerData(customer_folder)
             strLocation = dataframe['Location'].copy()
             processedDf = self.prepareData(dataframe)
             # Data scaling
@@ -280,7 +266,7 @@ class Classification:
             if (modelID == 'decisiontree'):
                 predict_proba = self.predictProba(model, scaledData)
                 prediction = np.argmax(predict_proba, axis=1)
-            elif (self.isKerasModel(modelID)):
+            elif (isKerasModel(modelID)):
                 prediction = self.predict(model, scaledData)
                 prediction = np.argmax(prediction, axis=1)
             else:
@@ -288,17 +274,18 @@ class Classification:
             predictedCategories = self.classificationResult(prediction, modelID)
             extendedDfObj = self.extendDataframe(root_folder, prediction, predictedCategories, processedDf, user_id, modelID)
             extendedDf = extendedDfObj["extendedDF"]
+            self.extendedDfPath = extendedDfObj["fullPath"]
+            self.extendedDfFull = extendedDf.to_csv()
             self.correlationMatrix = self.generateCorrelationMatrixPlot(self, extendedDf, user_id, root_folder, modelID)
             self.dataOverview = self.generateDataOverviewPlot(self, extendedDf, user_id, root_folder, modelID)
             self.aqiClasses = self.generateAQIClassesPlot(self, extendedDf, user_id, root_folder, modelID)
             self.aqiByLocation = self.generateAQIByLocationPlot(self, extendedDf, user_id, root_folder, modelID, strLocation)
             self.aqiByMonth = self.generateAQIByMonthPlot(self, extendedDf, user_id, root_folder, modelID)
-            self.extendedDfPath = extendedDfObj["fullPath"]
-            self.extendedDfFull = extendedDf.to_csv()
+            # Create Zip archive
             archive_folder = STATIC_FOLDER + user_id + CLASSIFICATION_FOLDER + modelID
-            archive_file_path = archive_folder + '.zip'
-            shutil.make_archive(archive_folder, 'zip', archive_file_path)
-            self.archiveFilePath = archive_file_path
+            zipDirectory(os.path.join(root_folder, archive_folder))
+            self.archiveFilePath = archive_folder + '.zip'
+
             plt.close("all")
         except Exception as error:
             print("- classification init error")

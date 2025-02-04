@@ -6,6 +6,10 @@ import seaborn as sns
 import pandas as pd
 import numpy as np
 import os
+import sys
+sys.path.append('../')
+
+from helpers.dbHelper import *
 
 matplotlib.use("agg")
 
@@ -13,7 +17,6 @@ STATIC_FOLDER = "static/active_sessions/"
 PLOTS_FOLDER = "/eda"
 DATA_DISTRIBUTION_FOLDER = PLOTS_FOLDER + "/data_distribution"
 EMISSION_INDEX_FOLDER = PLOTS_FOLDER + "/emission_index"
-DATA_FILE_NAME = "/data.csv"
 IMG_EXTENSION = ".png"
 CORRELATION_MATRIX_FILE_NAME = "correlation_matrix" + IMG_EXTENSION
 Z_SCOPE_FILE_NAME = "z_score" + IMG_EXTENSION
@@ -22,13 +25,6 @@ CLASS_DISTRIBUTION_FILE_NAME = "class_distribution" + IMG_EXTENSION
 
 
 class ExploratoryDataAnalysis:
-    @staticmethod
-    def getCustomerData(customer_folder):
-        data_path = customer_folder + DATA_FILE_NAME
-        data = os.path.abspath(data_path)
-        dataframe = pd.read_csv(data)
-        return dataframe
-
     @staticmethod
     def generateImgFullPath(user_id, img_folder, img_name):
         img_path = STATIC_FOLDER + user_id + img_folder
@@ -164,7 +160,7 @@ class ExploratoryDataAnalysis:
             print(f"-{type(error).__name__}: {error}")
 
     def __init__(self, user_id, customer_folder, root_folder):
-        rawDf = self.getCustomerData(customer_folder)
+        rawDf = getCustomerData(customer_folder)
         dataframe = self.prepareData(rawDf)
         values = ["PM2.5", "PM10", "O3", "CO", "SO2", "NO2"]
         self.dataDistributionPlots = {}

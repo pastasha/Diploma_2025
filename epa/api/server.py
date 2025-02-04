@@ -4,7 +4,9 @@ import psycopg2
 import pandas as pd
 from werkzeug.utils import secure_filename
 from flask import Flask, request, jsonify, make_response
-from utilities import *
+
+
+from helpers.dbHelper import *
 from classes.eda import ExploratoryDataAnalysis
 from classes.classification import Classification
 from classes.regression import Regression
