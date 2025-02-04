@@ -1,6 +1,7 @@
 import React, { useState, useRef } from "react";
 import Papa from "papaparse";
 import "../styles/fileUploader.css";
+import "../styles/base.css";
 
 export function FileUploader() {
 
@@ -20,10 +21,8 @@ export function FileUploader() {
     };
 
     const [fileName, setFileName] = useState("");
-    const [fileSize, setFileSize] = useState("");
 
     // States to store parsed data, table Column name and the values
-    const [parsedData, setParsedData] = useState([]); // eslint-disable-line
     const [tableRows, setTableRows] = useState([]);
     const [values, setValues] = useState([]);
 
@@ -47,7 +46,6 @@ export function FileUploader() {
                 alert('Error uploading file');
             } else {
                 setFileName(fileUploaded.name);
-                setFileSize(fileUploaded.size);
                 Papa.parse(fileUploaded, {
                     header: true,
                     skipEmptyLines: true,
@@ -60,9 +58,6 @@ export function FileUploader() {
                             rowsArray.push(Object.keys(d));
                             valuesArray.push(Object.values(d));
                         });
-                
-                        // Parsed Data Response in array format
-                        setParsedData(results.data);
                         // Filtered Column Names
                         setTableRows(rowsArray[0]);
                         // Filtered Values
@@ -91,33 +86,35 @@ export function FileUploader() {
                 accept=".csv"
             />
 
-            {/* File info */}
-            {fileName ? <p class="pt-3">Uploaded file: {fileName}</p> : null}
+            <div class=" info-wrapper pt-3">
+                {fileName ? <p>Check the data you uploaded. If you are ready to start Exploratory Data Analysis, press <mark>Confirm data</mark> button.</p> : null}
 
-            {/* Table */}
-            <div class="uploaded-file-wrapper">
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            {tableRows.map((rows, index) => {
-                                return <th scope="col" key={index}>{rows}</th>;
+                {fileName ? <p class="pt-3">Uploaded file: {fileName}</p> : null}
+
+                <div class="uploaded-file-wrapper">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                {tableRows.map((rows, index) => {
+                                    return <th scope="col" key={index}>{rows}</th>;
+                                })}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {values.map((value, index) => { // eslint-disable-line
+                                if (index <= 50) {
+                                    return (
+                                        <tr key={index}> 
+                                            {value.map((val, i) => {
+                                                return <td key={i}>{val}</td>;
+                                            })}
+                                        </tr>
+                                    );
+                                }
                             })}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {values.map((value, index) => { // eslint-disable-line
-                            if (index <= 50) {
-                                return (
-                                    <tr key={index}> 
-                                        {value.map((val, i) => {
-                                            return <td key={i}>{val}</td>;
-                                        })}
-                                    </tr>
-                                );
-                            }
-                        })}
-                    </tbody>
-                </table>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             {/* Analyse button */}

@@ -343,3 +343,16 @@ body {
 	opacity: 1;
 	transform: translateY(0);
 }
+
+.info-wrapper {
+	padding: 20px 100px;
+
+	p {
+		text-align: justify;
+		text-indent: 1.5em;
+	
+		mark {
+			background-color: rgb(232, 248, 254);
+		}
+	}
+}

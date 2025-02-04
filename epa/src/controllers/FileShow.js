@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { CsvToHtmlTable } from 'react-csv-to-table';
 import "../styles/fileUploader.css";
 
