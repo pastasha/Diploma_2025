@@ -9,8 +9,8 @@ import os
 
 matplotlib.use("agg")
 
-STATIC_IMAGES_FOLDER = "static/images/"
-PLOTS_FOLDER = "/plots"
+STATIC_FOLDER = "static/active_sessions/"
+PLOTS_FOLDER = "/eda"
 DATA_DISTRIBUTION_FOLDER = PLOTS_FOLDER + "/data_distribution"
 EMISSION_INDEX_FOLDER = PLOTS_FOLDER + "/emission_index"
 DATA_FILE_NAME = "/data.csv"
@@ -31,12 +31,12 @@ class ExploratoryDataAnalysis:
 
     @staticmethod
     def generateImgFullPath(user_id, img_folder, img_name):
-        img_path = STATIC_IMAGES_FOLDER + user_id + img_folder
+        img_path = STATIC_FOLDER + user_id + img_folder
         return img_path + "/" + img_name
 
     @staticmethod
     def saveImageToStaticFolder(user_id, root_folder, img_folder, img_name):
-        img_path = STATIC_IMAGES_FOLDER + user_id + img_folder
+        img_path = STATIC_FOLDER + user_id + img_folder
         os.makedirs(os.path.join(root_folder, img_path), exist_ok=True)
         filename = secure_filename(img_name)
         plt.savefig(os.path.join(img_path, filename))

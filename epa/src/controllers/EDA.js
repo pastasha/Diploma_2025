@@ -50,48 +50,62 @@ export function EDA() {
     return (
         <div>
             <p>Exploratory Data Analysis, simply referred to as EDA, is the step where you understand the data in detail.</p>
-            <button className="standard-upload start-eda-button" onClick={handleClick}>
-                Start EDA
-            </button>
-
-            {resultEDA &&  resultEDA.dataDistributionPlots ? <p>Data Distribution</p> : ''}
-            <div class="one-row-plots data-distribution-plots">
-                {resultEDA &&  resultEDA.dataDistributionPlots ? Object.keys(resultEDA.dataDistributionPlots).map((plotName, index) => {
-                    return (
-                        <div class="one-row-plot dd-plot" data-plot-name={plotName}> 
-                            {resultEDA.dataDistributionPlots[plotName]}
+            {!resultEDA ? 
+                <button className="standard-upload start-eda-button" onClick={handleClick}>
+                    Start EDA
+                </button>
+            : ''}
+            {resultEDA ?
+                <div class="eda">
+                    {resultEDA.dataDistributionPlots ?
+                        <div class="row pt-4">
+                            <p>Data Distribution</p>
+                            {Object.keys(resultEDA.dataDistributionPlots).map((plotName, index) => {
+                                return (
+                                    <div class="col" data-plot-name={plotName}> 
+                                        {resultEDA.dataDistributionPlots[plotName]}
+                                    </div>
+                                );
+                            })}
                         </div>
-                    );
-                }) : ""}
-            </div>
-
-            {resultEDA &&  resultEDA.emissionIndexPlots ? <p>Emission Index</p> : ''}
-            <div class="emission-index-plots">
-                {resultEDA &&  resultEDA.emissionIndexPlots ? Object.keys(resultEDA.emissionIndexPlots).map((plotName, index) => {
-                    return (
-                        <div class='ei-plot' data-plot-name={plotName}> 
-                            {resultEDA.emissionIndexPlots[plotName]}
+                    : ''}
+                    {resultEDA.emissionIndexPlots ?
+                        <div class="row pt-4">
+                            <p>Emission Index</p>
+                            <div class="col">
+                                {resultEDA.emissionIndexPlots["PM2.5"]}
+                                {resultEDA.emissionIndexPlots["PM10"]}
+                                {resultEDA.emissionIndexPlots["O3"]}
+                            </div>
+                            <div class="col">
+                                {resultEDA.emissionIndexPlots["CO"]}
+                                {resultEDA.emissionIndexPlots["SO2"]}
+                                {resultEDA.emissionIndexPlots["NO2"]}
+                            </div>
                         </div>
-                    );
-                }) : ''}
-            </div>
-
-            <div class="one-row-plots">
-                <div class="one-row-plot correlation-matrix-plot">
-                    {resultEDA && resultEDA.correlationMatrixPlot ? <p>Correlation Matrix</p> : ''}
-                    {resultEDA && resultEDA.correlationMatrixPlot ? resultEDA.correlationMatrixPlot : ''}
+                    : ''}
+                    <div class="row pt-4">
+                        {resultEDA.correlationMatrixPlot ?
+                            <div class="col correlation-matrix-plot">
+                                <p>Correlation Matrix</p>
+                                {resultEDA.correlationMatrixPlot}
+                            </div>
+                        : ''}
+                        {resultEDA.zScorePlot ?
+                            <div class="col z-score-plot">
+                                <p>Z-Score</p>
+                                {resultEDA.zScorePlot}
+                            </div>
+                        : ''}
+                    </div>
+                    {resultEDA.pairplotPlot ?
+                        <div class="pairplot pt-4">
+                            <p>Pairplot</p>
+                            {resultEDA.pairplotPlot}
+                        </div>
+                    : ''}
                 </div>
-
-                <div class="one-row-plot z-score-plot">
-                    {resultEDA && resultEDA.zScorePlot ? <p>Z-Score</p> : ''}
-                    {resultEDA && resultEDA.zScorePlot ? resultEDA.zScorePlot : ''}
-                </div>
-            </div>
-
-            <div class="pairplot-plot">
-                {resultEDA && resultEDA.pairplotPlot ? <p>Pairplot</p> : ''}
-                {resultEDA && resultEDA.pairplotPlot ? resultEDA.pairplotPlot : ''}
-            </div>
+            : ''}
         </div>
     );
 };

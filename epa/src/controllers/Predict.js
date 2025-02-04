@@ -1,7 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import { FileShow } from "./FileShow";
+import React, { useState } from 'react';
 import '../styles/predict.css';
 
+const serverURL = "http://127.0.0.1:5000/"
 export function Predict() {
+    function imageComponent(filename) {
+        const imageUrl = serverURL + filename;
+        return <img src={imageUrl} alt="filename" />;
+    };
 
     let [modelID, setModelID] = useState("");
     let [modelType, setModelType] = useState("");
@@ -32,6 +38,29 @@ export function Predict() {
         event.currentTarget.style.background='#deffde';
         event.currentTarget.style.borderColor='green';
         setModelType(modelType);
+        setPredictionResult(null);
+    }; 
+
+    // when the Button component is clicked
+    const downloadDf = (event) => {
+        const url = predictionResult.extendedDfPath;
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "Report.csv";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }; 
+
+    // when the Button component is clicked
+    const downloadZip = (event) => {
+        const url = predictionResult.archiveFilePath;
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = modelID + ".zip";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }; 
 
     const [predictionResult, setPredictionResult] = useState("");
@@ -53,9 +82,22 @@ export function Predict() {
             alert('Error Prediction processing');
         } else {
             let predictData = res.data;
-            let predictResult = {
-                "predictionResult": predictData.predictionResult,
-                "predictedCategories": predictData.predictedCategories
+            let predictResult = {};
+            predictResult.type = predictData.type;
+            predictResult.extendedDfPath = serverURL + predictData.extendedDfPath;
+            predictResult.extendedDfFull = predictData.extendedDfFull;
+            predictResult.archiveFilePath = serverURL + predictData.archiveFilePath;
+            if (predictResult.type === "classification") {
+                predictResult.dataOverview = imageComponent(predictData.dataOverview);
+                predictResult.aqiClasses = imageComponent(predictData.aqiClasses);
+                predictResult.aqiByLocation = imageComponent(predictData.aqiByLocation);
+                predictResult.aqiByMonth = imageComponent(predictData.aqiByMonth);
+                predictResult.correlationMatrix = imageComponent(predictData.correlationMatrix);
+            } else if (predictResult.type === "regression") {
+                predictResult.aqiPercantage = imageComponent(predictData.aqiPercantage);
+                predictResult.aqiByTime = imageComponent(predictData.aqiByTime);
+                predictResult.aqiByLocation = imageComponent(predictData.aqiByLocation);
+                predictResult.correlationMatrix = imageComponent(predictData.correlationMatrix);
             }
             setPredictionResult(predictResult);
         }
@@ -112,16 +154,80 @@ export function Predict() {
                 </div>
             : ''}
 
-            {modelID && modelType ?
-                <button class="standard-upload" onClick={handleClick}>
+            {modelID && modelType && !predictionResult ?
+                <button class="start-prediction standard-upload" onClick={handleClick}>
                     Start Prediction
                 </button>
             : ''}
 
-            <br/>
-            {predictionResult && predictionResult.predictionResult ? predictionResult.predictionResult : ''}
-            <br/>
-            {predictionResult && predictionResult.predictedCategories ? predictionResult.predictedCategories : ''}
+            {modelID && modelType && predictionResult ? 
+                <FileShow file = {predictionResult.extendedDfFull}/>
+            : ''}
+
+            {modelID && modelType && predictionResult ? 
+                <div class="one-row-select-wrapper">
+                    <button className="standard-upload" onClick={downloadDf}>
+                        Download CSV report
+                    </button>
+                </div>
+            : ''}
+
+            {modelID && modelType && predictionResult &&  predictionResult.type === "classification" ? 
+                <div class="classification-wrapper">
+                    <div class="row">
+                        <div class="col"> 
+                            <div class="data-overview-plot"> 
+                                {predictionResult.dataOverview ? predictionResult.dataOverview : ''}
+                            </div>
+                            <div class="aqi-classes"> 
+                                {predictionResult.aqiClasses ? predictionResult.aqiClasses : ''}
+                            </div>
+                        </div>
+                        <div class="col"> 
+                            <div class="aqi-by-month"> 
+                                {predictionResult.aqiByMonth ? predictionResult.aqiByMonth : ''}
+                            </div>
+                            <div class="corr-matrix"> 
+                                {predictionResult.correlationMatrix ? predictionResult.correlationMatrix : ''}
+                            </div>
+                        </div>
+                        <div class="aqi-by-location"> 
+                            {predictionResult.aqiByLocation ? predictionResult.aqiByLocation : ''}
+                        </div>
+                    </div>
+                </div>
+            : ''}
+
+            {modelID && modelType && predictionResult &&  predictionResult.type === "regression" ? 
+                <div class="regression-wrapper">
+                    <div class="row">
+                        <div class="col"> 
+                            <div class="aqi-percentage"> 
+                                {predictionResult.aqiPercantage ? predictionResult.aqiPercantage : ''}
+                            </div>
+                        </div>
+                        <div class="col"> 
+                            <div class="corr-matrix"> 
+                                {predictionResult.correlationMatrix ? predictionResult.correlationMatrix : ''}
+                            </div>
+                        </div>
+                        <div class="aqi-by-location"> 
+                            {predictionResult.aqiByLocation ? predictionResult.aqiByLocation : ''}
+                        </div>
+                        <div class="aqi-by-time"> 
+                            {predictionResult.aqiByTime ? predictionResult.aqiByTime : ''}
+                        </div>
+                    </div>
+                </div>
+            : ''}
+
+            {modelID && modelType && predictionResult ? 
+                <div class="one-row-select-wrapper">
+                    <button className="model-select model-select-type" onClick={downloadZip}>
+                        Download ZIP report
+                    </button>
+                </div>
+            : ''}
         </div>
     );
 }

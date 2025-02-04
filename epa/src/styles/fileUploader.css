@@ -20,7 +20,13 @@
 }
 
 .uploaded-file-wrapper {
-    margin: 10px 30px;
     text-align: left;
     overflow-x: auto;
+}
+
+.df-col {
+    &:last-child {
+        background-color: rgb(222, 255, 222);
+        border-color: green;
+    }
 }

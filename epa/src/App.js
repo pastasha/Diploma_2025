@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { HashRouter } from "react-router-dom";
 import Home from "./controllers/Home";
+import DataUpload from "./controllers/DataUpload";
 import { EDA } from "./controllers/EDA";
 import { Predict }  from "./controllers/Predict";
 import { Session } from "./controllers/Session";
@@ -16,7 +17,9 @@ render() {
       <div className="App">
       <link rel="{Logo}"/>
       <header class="header">
-        <h1>Environmental Performance Analyzer</h1>
+        <div class="header-img-wrapper">
+          <h1>Environmental Performance Analyzer</h1>
+        </div>
       </header>
 
       <nav class="sticky navbar fixed-top">
@@ -39,9 +42,14 @@ render() {
 
       <main>
         <section>
+          <div class="section-wrapper pt-5 mt-2" id="intro">
+            <Home />
+          </div>
+        </section>
+        <section>
           <div class="section-wrapper" id="upload">
             <h1>Upload data</h1>
-            <Home />
+            <DataUpload />
           </div>
         </section>
         <section>

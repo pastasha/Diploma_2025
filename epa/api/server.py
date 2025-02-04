@@ -6,7 +6,8 @@ from werkzeug.utils import secure_filename
 from flask import Flask, request, jsonify, make_response
 from utilities import *
 from classes.eda import ExploratoryDataAnalysis
-from classes.predict import Predict
+from classes.classification import Classification
+from classes.regression import Regression
 
 # Initializing flask app
 app = Flask(__name__)
@@ -117,11 +118,28 @@ def predict():
         user_df = pd.DataFrame(columns=col_names)
         user_df = get_data_from_db(get_statement, connection, cursor, user_df, col_names)[0][0]
         customer_folder = user_df['files_path']
-        predictionObject = Predict(user_id, customer_folder, app.root_path, req["modelType"], req["modelID"])
-        predictionResult = {
-            "predictionResult": predictionObject.predictionResult.tolist(),
-            "predictedCategories": predictionObject.predictedCategories
-        }
+        predictionResult = {}
+        if (req["modelType"] == "classification"):
+            predictionObject = Classification(user_id, customer_folder, app.root_path, req["modelID"])
+            predictionResult["type"] = "classification"
+            predictionResult["extendedDfPath"] = predictionObject.extendedDfPath
+            predictionResult["dataOverview"] = predictionObject.dataOverview
+            predictionResult["aqiClasses"] = predictionObject.aqiClasses
+            predictionResult["aqiByLocation"] = predictionObject.aqiByLocation
+            predictionResult["aqiByMonth"] = predictionObject.aqiByMonth
+            predictionResult["correlationMatrix"] = predictionObject.correlationMatrix
+            predictionResult["extendedDfFull"] = predictionObject.extendedDfFull
+            predictionResult["archiveFilePath"] = predictionObject.archiveFilePath
+        elif (req["modelType"] == "regression"):
+            predictionObject = Regression(user_id, customer_folder, app.root_path, req["modelID"])
+            predictionResult["type"] = "regression"
+            predictionResult["extendedDfPath"] = predictionObject.extendedDfPath
+            predictionResult["aqiByLocation"] = predictionObject.aqiByLocation
+            predictionResult["aqiPercantage"] = predictionObject.aqiPercantage
+            predictionResult["aqiByTime"] = predictionObject.aqiByTime
+            predictionResult["correlationMatrix"] = predictionObject.correlationMatrix
+            predictionResult["extendedDfFull"] = predictionObject.extendedDfFull
+            predictionResult["archiveFilePath"] = predictionObject.archiveFilePath
         success = True
     except Exception as e:
         print(f"Couldn't process prediction: {e}")
