@@ -1,29 +1,25 @@
-from sklearn.preprocessing import LabelEncoder, MinMaxScaler
-from tensorflow.keras.models import load_model
+from sklearn.preprocessing import MinMaxScaler
 from werkzeug.utils import secure_filename
 import matplotlib.pyplot as plt
 import matplotlib
 import seaborn as sns
 import pandas as pd
 import numpy as np
-import pickle
 import warnings
 import os
 import sys
 sys.path.append('../')
 
 from helpers.predictHelper import *
+from helpers.imgHelper import *
 from helpers.dbHelper import *
 
 warnings.filterwarnings('ignore')
 matplotlib.use("agg")
 
 
-SERIALIZED_MODELS_FOLDER = "./models"
 REGRESSION_FOLDER = "/regression/"
-STATIC_FOLDER = "static/active_sessions/"
 REGRESSION_REPORT_FILE_NAME = "regressionReport.csv"
-IMG_EXTENSION = ".png"
 AQI_BY_LOCATION_FILE_NAME = "aqiByLocation" + IMG_EXTENSION
 AQI_BY_DATE_FILE_NAME = "aqiByDate" + IMG_EXTENSION
 AQI_PIE_FILE_NAME = "aqiPie" + IMG_EXTENSION
@@ -41,53 +37,6 @@ SERIALIZED_MODELS = {
 
 
 class Regression:
-    def prepareData(self, dataframe):
-        try:
-            processedDf = dataframe[["Location", "Year", "Month", "Day", "Hour", "PM2.5", "PM10", "O3", "CO", "SO2", "NO2"]].copy()
-            # Label encoding
-            le = LabelEncoder()
-            processedDf["Location"] = le.fit_transform(processedDf["Location"])
-            processedDf["Hour"] = le.fit_transform(processedDf["Hour"])
-            processedDf.fillna(processedDf.mean(), inplace=True)
-            return processedDf
-        except Exception as error:
-                print("- prepareData error:")
-                print(f"- {type(error).__name__}: {error}")
-
-    @staticmethod
-    def generateImgFullPath(user_id, img_folder, img_name, modelID):
-        img_path = STATIC_FOLDER + user_id + img_folder + modelID
-        full_path = img_path + "/" + img_name
-        return full_path
-    
-    @staticmethod
-    def saveImageToStaticFolder(user_id, root_folder, img_folder, img_name, modelID):
-        img_path = STATIC_FOLDER + user_id + img_folder + modelID
-        os.makedirs(os.path.join(root_folder, img_path), exist_ok=True)
-        filename = secure_filename(img_name)
-        plt.savefig(os.path.join(img_path, filename))
-        return img_path + "/" + filename
-
-    @staticmethod
-    def checkIfImgExists(root_folder, img_path):
-        imgExists = False
-        if (os.path.isfile(os.path.join(root_folder, img_path))):
-            imgExists = True
-        return imgExists
-
-    def callModel(self, root_folder, modelID):
-        try:
-            model_path = os.path.join(root_folder, SERIALIZED_MODELS[modelID])
-            model = ''
-            if isKerasModel(modelID):
-                model = load_model(model_path)
-            else:
-                model = pickle.load(open(model_path, 'rb'))
-            return model
-        except Exception as error:
-                print("- callModel error:")
-                print(f"- {type(error).__name__}: {error}")
-
     def scaleData(self, dataframe, modelID):
         try:
             # Data scaling (use the same scaler as during training)
@@ -138,8 +87,8 @@ class Regression:
     @staticmethod
     def generateAQIByLocationPlot(self, extendedDf, user_id, root_folder, modelID, strLocation):
         try:
-            img_path = self.generateImgFullPath(user_id, REGRESSION_FOLDER, AQI_BY_LOCATION_FILE_NAME, modelID)
-            if (self.checkIfImgExists(root_folder, img_path) == False):
+            img_path = generateImgFullPath(user_id, REGRESSION_FOLDER, AQI_BY_LOCATION_FILE_NAME, modelID)
+            if (checkIfImgExists(root_folder, img_path) == False):
                 dfWithLocation = extendedDf.copy()
                 dfWithLocation['strLocation'] = strLocation
                 figWidth = 10
@@ -154,7 +103,7 @@ class Regression:
                 plt.xlabel('strLocation')
                 plt.ylabel('Average AQI')
                 # save result
-                img_path = self.saveImageToStaticFolder(user_id, root_folder, REGRESSION_FOLDER, AQI_BY_LOCATION_FILE_NAME, modelID)
+                img_path = saveImageToStaticFolder(user_id, root_folder, REGRESSION_FOLDER, AQI_BY_LOCATION_FILE_NAME, modelID)
             return img_path
         except Exception as error:
             print("- generateAQIByLocationPlot error")
@@ -163,8 +112,8 @@ class Regression:
     @staticmethod
     def percantageAQIDistributionPlot(self, extendedDf, user_id, root_folder, modelID):
         try:
-            img_path = self.generateImgFullPath(user_id, REGRESSION_FOLDER, AQI_PIE_FILE_NAME, modelID)
-            if (self.checkIfImgExists(root_folder, img_path) == False):
+            img_path = generateImgFullPath(user_id, REGRESSION_FOLDER, AQI_PIE_FILE_NAME, modelID)
+            if (checkIfImgExists(root_folder, img_path) == False):
                 aqi_distribution = extendedDf['AQI'].value_counts(bins=5)
                 # Побудова кругової діаграми
                 plt.figure(figsize=(8, 8))
@@ -177,7 +126,7 @@ class Regression:
                 plt.title('Percentage distribution of AQI')
                 plt.ylabel('')  # Remove the Y axis label
                 # save result
-                img_path = self.saveImageToStaticFolder(user_id, root_folder, REGRESSION_FOLDER, AQI_PIE_FILE_NAME, modelID)
+                img_path = saveImageToStaticFolder(user_id, root_folder, REGRESSION_FOLDER, AQI_PIE_FILE_NAME, modelID)
             return img_path
         except Exception as error:
             print("- percantageAQIDistributionPlot error")
@@ -186,14 +135,14 @@ class Regression:
     @staticmethod
     def generateCorrelationMatrixPlot(self, extendedDf, user_id, root_folder, modelID):
         try:
-            img_path = self.generateImgFullPath(user_id, REGRESSION_FOLDER, CORR_MATRIX_FILE_NAME, modelID)
-            if (self.checkIfImgExists(root_folder, img_path) == False):
+            img_path = generateImgFullPath(user_id, REGRESSION_FOLDER, CORR_MATRIX_FILE_NAME, modelID)
+            if (checkIfImgExists(root_folder, img_path) == False):
                 corr_matrix = extendedDf[['AQI', 'PM2.5', 'PM10', 'O3', 'CO', 'SO2', 'NO2']].corr()
                 plt.plot(legend=False)
                 sns.heatmap(corr_matrix, annot=True, cmap='RdBu', fmt=".2f")
                 plt.title('Correlation matrix')
                 # save result
-                img_path = self.saveImageToStaticFolder(user_id, root_folder, REGRESSION_FOLDER, CORR_MATRIX_FILE_NAME, modelID)
+                img_path = saveImageToStaticFolder(user_id, root_folder, REGRESSION_FOLDER, CORR_MATRIX_FILE_NAME, modelID)
             return img_path
         except Exception as error:
             print("- generateCorrelationMatrixPlot error")
@@ -202,8 +151,8 @@ class Regression:
     @staticmethod
     def generateAQIByTimePlot(self, extendedDf, user_id, root_folder, modelID):
         try:
-            img_path = self.generateImgFullPath(user_id, REGRESSION_FOLDER, AQI_BY_DATE_FILE_NAME, modelID)
-            if (self.checkIfImgExists(root_folder, img_path) == False):
+            img_path = generateImgFullPath(user_id, REGRESSION_FOLDER, AQI_BY_DATE_FILE_NAME, modelID)
+            if (checkIfImgExists(root_folder, img_path) == False):
                 extendedDf['Date'] = pd.to_datetime(extendedDf[['Year', 'Month', 'Day']])
                 time_aqi = extendedDf.groupby('Date')['AQI'].mean().reset_index()
                 plt.plot(time_aqi['Date'], time_aqi['AQI'], marker='.', linestyle='-', color='purple')
@@ -212,7 +161,7 @@ class Regression:
                 plt.ylabel('Average AQI')
                 plt.xticks(rotation=45)
                 # save result
-                img_path = self.saveImageToStaticFolder(user_id, root_folder, REGRESSION_FOLDER, AQI_BY_DATE_FILE_NAME, modelID)
+                img_path = saveImageToStaticFolder(user_id, root_folder, REGRESSION_FOLDER, AQI_BY_DATE_FILE_NAME, modelID)
             return img_path
         except Exception as error:
             print("- generateAQIByTimePlot error")
@@ -223,11 +172,11 @@ class Regression:
             # Get customer data
             dataframe = getCustomerData(customer_folder)
             strLocation = dataframe['Location'].copy()
-            processedDf = self.prepareData(dataframe)
+            processedDf = prepareData(dataframe)
             # Data scaling
             scaledData = self.scaleData(processedDf, modelID)
             # Call serialized model
-            model = self.callModel(root_folder, modelID)
+            model = callModel(root_folder, modelID, SERIALIZED_MODELS)
             # Predict results
             prediction = self.predict(model, scaledData)
             extendedDfObj = self.extendDataframe(root_folder, prediction, processedDf, user_id, modelID)
@@ -241,7 +190,7 @@ class Regression:
             # Create Zip archive
             archive_folder = STATIC_FOLDER + user_id + REGRESSION_FOLDER + modelID
             zipDirectory(os.path.join(root_folder, archive_folder))
-            self.archiveFilePath = archive_folder + '.zip'
+            self.archiveFilePath = archive_folder + ZIP_EXTENSION
 
             plt.close("all")
         except Exception as error:

@@ -9,6 +9,7 @@ import psycopg2.extras as psql_extras
 from datetime import datetime, timedelta
 import os
 
+
 ALLOWED_EXTENSIONS = {"csv", "xml"}
 SESSION_DAYS = 7
 SESSION_MAX_AGE = SESSION_DAYS * 24 * 60 * 60
