@@ -144,4 +144,4 @@ def getCustomerData(customer_folder):
         return dataframe
     except Exception as error:
         print("- getCustomerData error:")
-        print(f"- {type(error).__name__}: {error}")
+        print(f" - {type(error).__name__}: {error}")

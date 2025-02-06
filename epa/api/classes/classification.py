@@ -17,7 +17,6 @@ warnings.filterwarnings('ignore')
 matplotlib.use("agg")
 
 
-CLASSIFICATION_FOLDER = "/classification/"
 CLASSIFICATION_REPORT_FILE_NAME = "classificationReport.csv"
 DATA_OVERVIEW_FILE_NAME = "dataOverview" + IMG_EXTENSION
 AQI_CLASSES_FILE_NAME = "aqiClasses" + IMG_EXTENSION
@@ -47,7 +46,7 @@ class Classification:
             return X_new_scaled
         except Exception as error:
                 print("- scaleData error:")
-                print(f"- {type(error).__name__}: {error}")
+                print(f" - {type(error).__name__}: {error}")
 
     def predict(self, model, data):
         try:
@@ -55,7 +54,7 @@ class Classification:
             return prediction
         except Exception as error:
                 print("- predict error:")
-                print(f"- {type(error).__name__}: {error}")
+                print(f" - {type(error).__name__}: {error}")
     
     def predictProba(self, model, data):
         try:
@@ -63,7 +62,7 @@ class Classification:
             return predict_proba
         except Exception as error:
                 print("- predictProba error:")
-                print(f"- {type(error).__name__}: {error}")
+                print(f" - {type(error).__name__}: {error}")
 
     def classificationResult(self, prediction, modelID):
         try:
@@ -80,7 +79,7 @@ class Classification:
             return predicted_categories;
         except Exception as error:
                 print("- classificationResult error:")
-                print(f"- {type(error).__name__}: {error}")
+                print(f" - {type(error).__name__}: {error}")
 
     @staticmethod
     def extendDataframe(root_folder, prediction, predictedCategories, dataframe, user_id, modelID):
@@ -91,14 +90,14 @@ class Classification:
             file_path = STATIC_FOLDER + user_id + CLASSIFICATION_FOLDER + modelID
             os.makedirs(os.path.join(root_folder, file_path), exist_ok=True)
             full_path = os.path.join(file_path, secure_filename(CLASSIFICATION_REPORT_FILE_NAME))
-            extendedDF.to_csv(full_path)
+            extendedDF.to_csv(full_path, index=False, encoding='utf-8')
             return {
                 "extendedDF": extendedDF,
                 "fullPath": full_path
             }
         except Exception as error:
                 print("- extendDataframe error:")
-                print(f"- {type(error).__name__}: {error}")
+                print(f" - {type(error).__name__}: {error}")
 
     @staticmethod
     def generateDataOverviewPlot(self, extendedDf, user_id, root_folder, modelID):
@@ -222,7 +221,7 @@ class Classification:
             extendedDfObj = self.extendDataframe(root_folder, prediction, predictedCategories, processedDf, user_id, modelID)
             extendedDf = extendedDfObj["extendedDF"]
             self.extendedDfPath = extendedDfObj["fullPath"]
-            self.extendedDfFull = extendedDf.to_csv()
+            self.extendedDfFull = extendedDf.to_csv(index=False, encoding='utf-8')
             self.correlationMatrix = self.generateCorrelationMatrixPlot(self, extendedDf, user_id, root_folder, modelID)
             self.dataOverview = self.generateDataOverviewPlot(self, extendedDf, user_id, root_folder, modelID)
             self.aqiClasses = self.generateAQIClassesPlot(self, extendedDf, user_id, root_folder, modelID)
@@ -232,7 +231,9 @@ class Classification:
             archive_folder = STATIC_FOLDER + user_id + CLASSIFICATION_FOLDER + modelID
             zipDirectory(os.path.join(root_folder, archive_folder))
             self.archiveFilePath = archive_folder + ZIP_EXTENSION
-
+            # Append the compare df
+            appendCompareDf(root_folder, COMPARE_CLASSIFICATION_FOLDER, dataframe, extendedDf['AQI_Ctegories'], user_id, modelID)
+            # Close all the plots
             plt.close("all")
         except Exception as error:
             print("- classification init error")

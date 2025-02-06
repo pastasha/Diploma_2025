@@ -1,5 +1,7 @@
 from sklearn.preprocessing import LabelEncoder
 from tensorflow.keras.models import load_model
+from werkzeug.utils import secure_filename
+import pandas as pd
 import zipfile
 import pickle
 import os
@@ -10,6 +12,12 @@ ZIP_EXTENSION = '.zip'
 KERAS_MODELS = ['dnn', 'lstm', 'mlp']
 SERIALIZED_MODELS_FOLDER = "./models"
 STATIC_FOLDER = "static/active_sessions/"
+COMPARE_DATA_FILE_NAME = "compareData.csv"
+REGRESSION_FOLDER = "/regression/"
+CLASSIFICATION_FOLDER = "/classification/"
+COMPARE_REGRESSION_FOLDER = REGRESSION_FOLDER + "compare/"
+COMPARE_CLASSIFICATION_FOLDER = CLASSIFICATION_FOLDER + "compare/"
+MODEL_COLUMNS = ['decisiontree', 'randomforest', 'xgboost', 'dnn', 'lstm', 'mlp']
 
 def isKerasModel(modelID):
         if modelID in KERAS_MODELS:
@@ -33,7 +41,7 @@ def zipDirectory(folder_path):
         print(f"Archive {folder_path} is created.")
     except Exception as error:
                 print("- zipDirectory error:")
-                print(f"- {type(error).__name__}: {error}")
+                print(f" - {type(error).__name__}: {error}")
 
 def prepareData(dataframe):
     try:
@@ -46,7 +54,7 @@ def prepareData(dataframe):
         return processedDf
     except Exception as error:
             print("- prepareData error:")
-            print(f"- {type(error).__name__}: {error}")
+            print(f" - {type(error).__name__}: {error}")
 
 def callModel(root_folder, modelID, SERIALIZED_MODELS):
     try:
@@ -59,4 +67,42 @@ def callModel(root_folder, modelID, SERIALIZED_MODELS):
         return model
     except Exception as error:
             print("- callModel error:")
-            print(f"- {type(error).__name__}: {error}")
+            print(f" - {type(error).__name__}: {error}")
+
+def getCompareDf(root_folder, modelByTypeFolder, user_id):
+    try:
+        file_path = os.path.join(STATIC_FOLDER + user_id + modelByTypeFolder, secure_filename(COMPARE_DATA_FILE_NAME))
+        if (os.path.isfile(os.path.join(root_folder, file_path))):
+            df = pd.read_csv(os.path.abspath(file_path))
+            return df
+        else:
+            raise Exception("Can't find the compare dataframe: " + file_path)
+    except Exception as error:
+            print("- compareDataframe error:")
+            print(f" - {type(error).__name__}: {error}")
+
+def appendCompareDf(root_folder, modelByTypeFolder, dataframe, prediction, user_id, modelID):
+    try:
+        df = ''
+        folder_path = os.path.join(STATIC_FOLDER + user_id + modelByTypeFolder)
+        file_path = os.path.join(folder_path, secure_filename(COMPARE_DATA_FILE_NAME))
+        os.makedirs(folder_path, exist_ok=True)
+        if (os.path.isfile(os.path.join(root_folder, file_path))):
+            df = pd.read_csv(os.path.abspath(file_path))
+        else:
+            df = dataframe[["Location", "Year", "Month", "Day", "Hour"]].copy()
+        df[modelID] = prediction
+        df = df.loc[:, ~df.columns.str.contains('^Unnamed')]
+        print(file_path)
+        df.to_csv(file_path, index=False, encoding='utf-8')
+    except Exception as error:
+            print("- appendCompareDf error:")
+            print(f" - {type(error).__name__}: {error}")
+
+def prepareDataToCompare(dataframe):
+    try:
+        df_models = dataframe[MODEL_COLUMNS]
+        return df_models
+    except Exception as error:
+            print("- prepareDataToCompare error:")
+            print(f" - {type(error).__name__}: {error}")

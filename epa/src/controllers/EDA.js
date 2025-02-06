@@ -58,16 +58,31 @@ export function EDA() {
             {resultEDA ?
                 <div class="eda">
                     {resultEDA.dataDistributionPlots ?
+                        <>
                         <div class="row pt-4">
                             <p>Data Distribution</p>
-                            {Object.keys(resultEDA.dataDistributionPlots).map((plotName, index) => {
-                                return (
-                                    <div class="col" data-plot-name={plotName}> 
-                                        {resultEDA.dataDistributionPlots[plotName]}
-                                    </div>
-                                );
-                            })}
+                            <div class="col">
+                                {resultEDA.dataDistributionPlots["PM2.5"]}
+                            </div>
+                            <div class="col">
+                                {resultEDA.dataDistributionPlots["PM10"]}
+                            </div>
+                            <div class="col">
+                                {resultEDA.dataDistributionPlots["O3"]}
+                            </div>
                         </div>
+                        <div class="row pt-4">
+                            <div class="col">
+                                {resultEDA.dataDistributionPlots["CO"]}
+                            </div>
+                            <div class="col">
+                                {resultEDA.dataDistributionPlots["SO2"]}
+                            </div>
+                            <div class="col">
+                                {resultEDA.dataDistributionPlots["NO2"]}
+                            </div>
+                        </div>
+                        </>
                     : ''}
                     {resultEDA.emissionIndexPlots ?
                         <div class="row pt-4">

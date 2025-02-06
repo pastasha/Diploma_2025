@@ -18,7 +18,6 @@ warnings.filterwarnings('ignore')
 matplotlib.use("agg")
 
 
-REGRESSION_FOLDER = "/regression/"
 REGRESSION_REPORT_FILE_NAME = "regressionReport.csv"
 AQI_BY_LOCATION_FILE_NAME = "aqiByLocation" + IMG_EXTENSION
 AQI_BY_DATE_FILE_NAME = "aqiByDate" + IMG_EXTENSION
@@ -49,7 +48,7 @@ class Regression:
             return X_new_scaled
         except Exception as error:
                 print("- scaleData error:")
-                print(f"- {type(error).__name__}: {error}")
+                print(f" - {type(error).__name__}: {error}")
 
     def predict(self, model, data):
         try:
@@ -57,7 +56,7 @@ class Regression:
             return prediction
         except Exception as error:
                 print("- predict error:")
-                print(f"- {type(error).__name__}: {error}")
+                print(f" - {type(error).__name__}: {error}")
     
     def predictProba(self, model, data):
         try:
@@ -65,7 +64,7 @@ class Regression:
             return predict_proba
         except Exception as error:
                 print("- predictProba error:")
-                print(f"- {type(error).__name__}: {error}")
+                print(f" - {type(error).__name__}: {error}")
 
     @staticmethod
     def extendDataframe(root_folder, prediction, dataframe, user_id, modelID):
@@ -75,14 +74,14 @@ class Regression:
             file_path = STATIC_FOLDER + user_id + REGRESSION_FOLDER + modelID
             os.makedirs(os.path.join(root_folder, file_path), exist_ok=True)
             full_path = os.path.join(file_path, secure_filename(REGRESSION_REPORT_FILE_NAME))
-            extendedDF.to_csv(full_path)
+            extendedDF.to_csv(full_path, index=False, encoding='utf-8')
             return {
                 "extendedDF": extendedDF,
                 "fullPath": full_path
             }
         except Exception as error:
                 print("- extendDataframe error:")
-                print(f"- {type(error).__name__}: {error}")
+                print(f" - {type(error).__name__}: {error}")
 
     @staticmethod
     def generateAQIByLocationPlot(self, extendedDf, user_id, root_folder, modelID, strLocation):
@@ -182,7 +181,7 @@ class Regression:
             extendedDfObj = self.extendDataframe(root_folder, prediction, processedDf, user_id, modelID)
             extendedDf = extendedDfObj["extendedDF"]
             self.extendedDfPath = extendedDfObj["fullPath"]
-            self.extendedDfFull = extendedDf.to_csv()
+            self.extendedDfFull = extendedDf.to_csv(index=False, encoding='utf-8')
             self.aqiByTime = self.generateAQIByTimePlot(self, extendedDf, user_id, root_folder, modelID)
             self.correlationMatrix = self.generateCorrelationMatrixPlot(self, extendedDf, user_id, root_folder, modelID)
             self.aqiByLocation = self.generateAQIByLocationPlot(self, extendedDf, user_id, root_folder, modelID, strLocation)
@@ -191,7 +190,9 @@ class Regression:
             archive_folder = STATIC_FOLDER + user_id + REGRESSION_FOLDER + modelID
             zipDirectory(os.path.join(root_folder, archive_folder))
             self.archiveFilePath = archive_folder + ZIP_EXTENSION
-
+            # Append the compare df
+            appendCompareDf(root_folder, COMPARE_REGRESSION_FOLDER, dataframe, extendedDf['AQI'], user_id, modelID)
+            # Close all the plots
             plt.close("all")
         except Exception as error:
             print("- regression init error")

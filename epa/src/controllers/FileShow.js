@@ -5,7 +5,7 @@ import "../styles/fileUploader.css";
 export function FileShow({file}) {
 
     return (
-        <div class="uploaded-file-wrapper">
+        <div class="uploaded-file-wrapper pt-3">
             <CsvToHtmlTable
             data={file}
             csvDelimiter=","
