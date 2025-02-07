@@ -1,6 +1,7 @@
 import { FileShow } from "./FileShow";
 import React, { useState } from 'react';
 import '../styles/predict.css';
+import { DownloadButton } from "./DownloadButton";
 
 const serverURL = "http://127.0.0.1:5000/"
 export function Compare() {
@@ -23,6 +24,7 @@ export function Compare() {
         event.currentTarget.style.background='#deffde';
         event.currentTarget.style.borderColor='green';
         setModelType(modelType);
+        setCompareResult('');
     }; 
 
     // when the Button component is clicked
@@ -43,6 +45,9 @@ export function Compare() {
             let compareData = res.data;
             let compareResult = {};
             compareResult.type = compareData.type;
+            compareResult.compareDfPath = serverURL + compareData.compareDfPath
+            compareResult.compareDfFull = compareData.compareDfFull
+            compareResult.archiveFilePath = serverURL + compareData.archiveFilePath;
             if (compareData.type === "classification") {
                 compareResult.forecastComparePlot = imageComponent(compareData.forecastComparePlot);
                 compareResult.heatmapPlot = imageComponent(compareData.heatmapPlot);
@@ -71,55 +76,70 @@ export function Compare() {
             </div>
 
             {modelType ?
-                <button class="start-prediction standard-upload" onClick={handleClick}>
-                    Start Compare
-                </button>
-            : ''}
+                <>
+                {!compareResult ?
+                    <button class="start-prediction standard-upload" onClick={handleClick}>
+                        Start Compare
+                    </button>
+                : ''}
+                {compareResult ?
+                    <>
+                    {compareResult.compareDfFull ? 
+                        <>
+                        <FileShow file = {compareResult.compareDfFull} markLastCol = {false} dataframePath = {compareResult.compareDfPath}/>
+                        </>
+                    : ''}
 
-            {modelType && compareResult &&  compareResult.type === "classification" ? 
-                <div class="classification-wrapper">
-                    <div class="row">
-                        <div class="col"> 
-                            <div class=""> 
-                                {compareResult.boxplotPlot ? compareResult.boxplotPlot : ''}
-                            </div>
-                            <div class=""> 
-                                {compareResult.heatmapPlot ? compareResult.heatmapPlot : ''}
+                    {compareResult.type === "classification" ? 
+                        <div class="classification-wrapper">
+                            <div class="row">
+                                <div class="col"> 
+                                    <div class=""> 
+                                        {compareResult.forecastComparePlot ? compareResult.forecastComparePlot : ''}
+                                    </div>
+                                    <div class=""> 
+                                        {compareResult.heatmapPlot ? compareResult.heatmapPlot : ''}
+                                    </div>
+                                </div>
+                                <div class="col"> 
+                                    <div class=""> 
+                                        {compareResult.aqiDistributionPlot ? compareResult.aqiDistributionPlot : ''}
+                                    </div>
+                                    <div class=""> 
+                                        {compareResult.popularityPlot ? compareResult.popularityPlot : ''}
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div class="col"> 
-                            <div class=""> 
-                                {compareResult.aqiDistributionPlot ? compareResult.aqiDistributionPlot : ''}
-                            </div>
-                            <div class=""> 
-                                {compareResult.popularityPlot ? compareResult.popularityPlot : ''}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            : ''}
+                    : ''}
 
-            {modelType && compareResult &&  compareResult.type === "regression" ? 
-                <div class="regression-wrapper">
-                    <div class="row">
-                        <div class="col"> 
-                            <div class=""> 
-                                {compareResult.forecastComparePlot ? compareResult.forecastComparePlot : ''}
-                            </div>
-                            <div class=""> 
-                                {compareResult.modelPredValuesPlot ? compareResult.modelPredValuesPlot : ''}
+                    {compareResult.type === "regression" ? 
+                        <div class="regression-wrapper">
+                            <div class="row">
+                                <div class="col"> 
+                                    <div class=""> 
+                                        {compareResult.boxplotPlot ? compareResult.boxplotPlot : ''}
+                                    </div>
+                                    <div class=""> 
+                                        {compareResult.aqiForecastPlot ? compareResult.aqiForecastPlot : ''}
+                                    </div>
+                                </div>
+                                <div class="col"> 
+                                    <div class=""> 
+                                        {compareResult.corrMatrixPlot ? compareResult.corrMatrixPlot : ''}
+                                    </div>
+                                    <div class=""> 
+                                        {compareResult.modelPredValuesPlot ? compareResult.modelPredValuesPlot : ''}
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div class="col"> 
-                            <div class=""> 
-                                {compareResult.corrMatrixPlot ? compareResult.corrMatrixPlot : ''}
-                            </div>
-                            <div class=""> 
-                                {compareResult.aqiForecastPlot ? compareResult.aqiForecastPlot : ''}
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                    : ''}
+
+                    <DownloadButton filePath = {compareResult.archiveFilePath} buttonText = {"Download ZIP report"}/>
+                    </>
+                : ''}
+                </>
             : ''}
         </div>
     );

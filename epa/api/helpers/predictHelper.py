@@ -12,11 +12,11 @@ ZIP_EXTENSION = '.zip'
 KERAS_MODELS = ['dnn', 'lstm', 'mlp']
 SERIALIZED_MODELS_FOLDER = "./models"
 STATIC_FOLDER = "static/active_sessions/"
-COMPARE_DATA_FILE_NAME = "compareData.csv"
+COMPARE_DATA_FILE_NAME = "/compareData.csv"
 REGRESSION_FOLDER = "/regression/"
 CLASSIFICATION_FOLDER = "/classification/"
-COMPARE_REGRESSION_FOLDER = REGRESSION_FOLDER + "compare/"
-COMPARE_CLASSIFICATION_FOLDER = CLASSIFICATION_FOLDER + "compare/"
+COMPARE_REGRESSION_FOLDER = REGRESSION_FOLDER + "compare"
+COMPARE_CLASSIFICATION_FOLDER = CLASSIFICATION_FOLDER + "compare"
 MODEL_COLUMNS = ['decisiontree', 'randomforest', 'xgboost', 'dnn', 'lstm', 'mlp']
 
 def isKerasModel(modelID):
@@ -74,7 +74,10 @@ def getCompareDf(root_folder, modelByTypeFolder, user_id):
         file_path = os.path.join(STATIC_FOLDER + user_id + modelByTypeFolder, secure_filename(COMPARE_DATA_FILE_NAME))
         if (os.path.isfile(os.path.join(root_folder, file_path))):
             df = pd.read_csv(os.path.abspath(file_path))
-            return df
+            return {
+                "dataframe": df,
+                "fullPath": file_path
+            }
         else:
             raise Exception("Can't find the compare dataframe: " + file_path)
     except Exception as error:

@@ -221,7 +221,7 @@ class Classification:
             extendedDfObj = self.extendDataframe(root_folder, prediction, predictedCategories, processedDf, user_id, modelID)
             extendedDf = extendedDfObj["extendedDF"]
             self.extendedDfPath = extendedDfObj["fullPath"]
-            self.extendedDfFull = extendedDf.to_csv(index=False, encoding='utf-8')
+            self.extendedDfFull = extendedDf.head(5).to_csv(index=False, encoding='utf-8')
             self.correlationMatrix = self.generateCorrelationMatrixPlot(self, extendedDf, user_id, root_folder, modelID)
             self.dataOverview = self.generateDataOverviewPlot(self, extendedDf, user_id, root_folder, modelID)
             self.aqiClasses = self.generateAQIClassesPlot(self, extendedDf, user_id, root_folder, modelID)

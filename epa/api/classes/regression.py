@@ -181,7 +181,7 @@ class Regression:
             extendedDfObj = self.extendDataframe(root_folder, prediction, processedDf, user_id, modelID)
             extendedDf = extendedDfObj["extendedDF"]
             self.extendedDfPath = extendedDfObj["fullPath"]
-            self.extendedDfFull = extendedDf.to_csv(index=False, encoding='utf-8')
+            self.extendedDfFull = extendedDf.head(5).to_csv(index=False, encoding='utf-8')
             self.aqiByTime = self.generateAQIByTimePlot(self, extendedDf, user_id, root_folder, modelID)
             self.correlationMatrix = self.generateCorrelationMatrixPlot(self, extendedDf, user_id, root_folder, modelID)
             self.aqiByLocation = self.generateAQIByLocationPlot(self, extendedDf, user_id, root_folder, modelID, strLocation)

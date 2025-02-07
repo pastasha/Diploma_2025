@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import '../styles/eda.css';
+import { DownloadButton } from "./DownloadButton";
 
 
 const serverURL = "http://127.0.0.1:5000/"
@@ -40,6 +41,7 @@ export function EDA() {
                 emissionIndexPlots[eiPlot] = imageComponent(edaData.emissionIndexPlots[eiPlot])
             }
             edaResult.emissionIndexPlots = emissionIndexPlots;
+            edaResult.archiveFilePath = serverURL + edaData.archiveFilePath;
             setResultEDA(edaResult);
 
             document.querySelector(".start-eda-button").value = 'Restart EDA';
@@ -50,12 +52,11 @@ export function EDA() {
     return (
         <div>
             <p>Exploratory Data Analysis, simply referred to as EDA, is the step where you understand the data in detail.</p>
-            {!resultEDA ? 
-                <button className="standard-upload start-eda-button" onClick={handleClick}>
-                    Start EDA
-                </button>
-            : ''}
+            <button className="standard-upload start-eda-button" onClick={handleClick}>
+                Start EDA
+            </button>
             {resultEDA ?
+                <>
                 <div class="eda">
                     {resultEDA.dataDistributionPlots ?
                         <>
@@ -119,7 +120,9 @@ export function EDA() {
                             {resultEDA.pairplotPlot}
                         </div>
                     : ''}
+                    <DownloadButton filePath = {resultEDA.archiveFilePath} buttonText = {"Download ZIP report"}/>
                 </div>
+                </> 
             : ''}
         </div>
     );

@@ -96,7 +96,8 @@ class compareClassification:
     def __init__(self, user_id, root_folder):
         try:
             # Get customer data
-            dataframe = getCompareDf(root_folder, COMPARE_CLASSIFICATION_FOLDER, user_id)
+            compareDfObj = getCompareDf(root_folder, COMPARE_CLASSIFICATION_FOLDER, user_id)
+            dataframe = compareDfObj["dataframe"]
             # Generate Forecast compare plot
             self.forecastComparePlot = self.generateForecastComparePlot(dataframe, user_id, root_folder)
             # Generate Heatmap plot
@@ -105,11 +106,19 @@ class compareClassification:
             self.aqiDistributionPlot = self.generateAQIDistributionPlot(dataframe, user_id, root_folder)
             # Generate popularity plot
             self.popularityPlot = self.generatePopularityPlot(dataframe, user_id, root_folder)
+            # Download CSV report
+            self.compareDfPath = compareDfObj["fullPath"]
+            dataframe['Location'] = dataframe['Location'].str.replace(',', ';').replace('"', '')
+            self.compareDfFull = dataframe.head(5).to_csv(index=False, encoding='utf-8')
+            # Create Zip archive
+            archive_folder = STATIC_FOLDER + user_id + COMPARE_CLASSIFICATION_FOLDER
+            zipDirectory(os.path.join(root_folder, archive_folder))
+            self.archiveFilePath = archive_folder + ZIP_EXTENSION
             # Close all the 
             plt.close("all")
         except Exception as error:
             print("- compare classification models init error")
-            print(f"-{type(error).__name__}: {error}")
+            print(f"- {type(error).__name__}: {error}")
 
 
 

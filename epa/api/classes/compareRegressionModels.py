@@ -94,7 +94,8 @@ class compareRegression:
     def __init__(self, user_id, root_folder):
         try:
             # Get customer data
-            dataframe = getCompareDf(root_folder, COMPARE_REGRESSION_FOLDER, user_id)
+            compareDfObj = getCompareDf(root_folder, COMPARE_REGRESSION_FOLDER, user_id)
+            dataframe = compareDfObj["dataframe"]
             # Generate Boxplot
             self.boxplotPlot = self.generateBoxPlot(dataframe, user_id, root_folder)
             # Generate model prediction values plot
@@ -103,6 +104,14 @@ class compareRegression:
             self.corrMatrixPlot = self.generateCorrelationMatrixPlot(dataframe, user_id, root_folder)
             # Generate correlation matrix
             self.aqiForecastPlot = self.generateAQIForecastPlot(dataframe, user_id, root_folder)
+            # Download CSV report
+            self.compareDfPath = compareDfObj["fullPath"]
+            dataframe['Location'] = dataframe['Location'].str.replace(',', ';').replace('"', '')
+            self.compareDfFull = dataframe.head(5).to_csv(index=False, encoding='utf-8')
+            # Create Zip archive
+            archive_folder = STATIC_FOLDER + user_id + COMPARE_REGRESSION_FOLDER
+            zipDirectory(os.path.join(root_folder, archive_folder))
+            self.archiveFilePath = archive_folder + ZIP_EXTENSION
             # Close all the plots
             plt.close("all")
         except Exception as error:

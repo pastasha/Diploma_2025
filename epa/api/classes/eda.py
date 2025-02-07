@@ -145,8 +145,10 @@ class ExploratoryDataAnalysis:
             self.emissionIndexPlots[value] = self.generateEmissionIndexPlot(self, dataframe, value, user_id, root_folder)
         # generate pairplot plot
         self.pairplotPlot = self.generatePairplotPlot(self, dataframe, user_id, root_folder)
-        # generate class distribution plot
-        #self.classDistribution = self.generateClassDistributionPlot(self, dataframe, user_id, root_folder)
+        # Create Zip archive
+        archive_folder = STATIC_FOLDER + user_id + PLOTS_FOLDER
+        zipDirectory(os.path.join(root_folder, archive_folder))
+        self.archiveFilePath = archive_folder + ZIP_EXTENSION
         plt.close("all")
 
 

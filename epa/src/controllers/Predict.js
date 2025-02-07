@@ -1,3 +1,4 @@
+import { DownloadButton } from "./DownloadButton";
 import { FileShow } from "./FileShow";
 import React, { useState } from 'react';
 import '../styles/predict.css';
@@ -39,29 +40,7 @@ export function Predict() {
         event.currentTarget.style.borderColor='green';
         setModelType(modelType);
         setPredictionResult(null);
-    }; 
-
-    // when the Button component is clicked
-    const downloadDf = (event) => {
-        const url = predictionResult.extendedDfPath;
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = "Report.csv";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    }; 
-
-    // when the Button component is clicked
-    const downloadZip = (event) => {
-        const url = predictionResult.archiveFilePath;
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = modelID + ".zip";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    }; 
+    };
 
     const [predictionResult, setPredictionResult] = useState("");
 
@@ -100,6 +79,7 @@ export function Predict() {
                 predictResult.correlationMatrix = imageComponent(predictData.correlationMatrix);
             }
             setPredictionResult(predictResult);
+            document.getElementById("compare").classList.remove("hidden");
         }
     }; 
 
@@ -139,8 +119,11 @@ export function Predict() {
                     </button>
                 </div>
             </div>
+            <div class="model-description">
+            </div>
 
             {modelID ? 
+                <>
                 <div class="container one-row-select-wrapper">
                     <p>Model type</p>
 
@@ -152,81 +135,74 @@ export function Predict() {
                         Regression
                     </button>
                 </div>
-            : ''}
+            
+                {modelType ?
+                <>
+                    {!predictionResult ?
+                        <button class="start-prediction standard-upload" onClick={handleClick}>
+                            Start Prediction
+                        </button>
+                    : ''}
 
-            {modelID && modelType && !predictionResult ?
-                <button class="start-prediction standard-upload" onClick={handleClick}>
-                    Start Prediction
-                </button>
-            : ''}
+                    {predictionResult ? 
+                    <>
+                        <FileShow file = {predictionResult.extendedDfFull} markLastCol = {true} dataframePath = {predictionResult.extendedDfPath}/>
 
-            {modelID && modelType && predictionResult ? 
-                <FileShow file = {predictionResult.extendedDfFull}/>
-            : ''}
+                        {predictionResult.type === "classification" ? 
+                            <div class="classification-wrapper">
+                                <div class="row">
+                                    <div class="col"> 
+                                        <div class="data-overview-plot"> 
+                                            {predictionResult.dataOverview ? predictionResult.dataOverview : ''}
+                                        </div>
+                                        <div class="aqi-classes"> 
+                                            {predictionResult.aqiClasses ? predictionResult.aqiClasses : ''}
+                                        </div>
+                                    </div>
+                                    <div class="col"> 
+                                        <div class="aqi-by-month"> 
+                                            {predictionResult.aqiByMonth ? predictionResult.aqiByMonth : ''}
+                                        </div>
+                                        <div class="corr-matrix"> 
+                                            {predictionResult.correlationMatrix ? predictionResult.correlationMatrix : ''}
+                                        </div>
+                                    </div>
+                                    <div class="aqi-by-location"> 
+                                        {predictionResult.aqiByLocation ? predictionResult.aqiByLocation : ''}
+                                    </div>
+                                </div>
+                            </div>
+                        : ''}
 
-            {modelID && modelType && predictionResult ? 
-                <div class="one-row-select-wrapper">
-                    <button className="standard-upload" onClick={downloadDf}>
-                        Download CSV report
-                    </button>
-                </div>
-            : ''}
+                        {predictionResult.type === "regression" ? 
+                            <div class="regression-wrapper">
+                                <div class="row">
+                                    <div class="col"> 
+                                        <div class="aqi-percentage"> 
+                                            {predictionResult.aqiPercantage ? predictionResult.aqiPercantage : ''}
+                                        </div>
+                                    </div>
+                                    <div class="col"> 
+                                        <div class="corr-matrix"> 
+                                            {predictionResult.correlationMatrix ? predictionResult.correlationMatrix : ''}
+                                        </div>
+                                    </div>
+                                    <div class="aqi-by-location"> 
+                                        {predictionResult.aqiByLocation ? predictionResult.aqiByLocation : ''}
+                                    </div>
+                                    <div class="aqi-by-time"> 
+                                        {predictionResult.aqiByTime ? predictionResult.aqiByTime : ''}
+                                    </div>
+                                </div>
+                            </div>
+                        : ''}
 
-            {modelID && modelType && predictionResult &&  predictionResult.type === "classification" ? 
-                <div class="classification-wrapper">
-                    <div class="row">
-                        <div class="col"> 
-                            <div class="data-overview-plot"> 
-                                {predictionResult.dataOverview ? predictionResult.dataOverview : ''}
-                            </div>
-                            <div class="aqi-classes"> 
-                                {predictionResult.aqiClasses ? predictionResult.aqiClasses : ''}
-                            </div>
-                        </div>
-                        <div class="col"> 
-                            <div class="aqi-by-month"> 
-                                {predictionResult.aqiByMonth ? predictionResult.aqiByMonth : ''}
-                            </div>
-                            <div class="corr-matrix"> 
-                                {predictionResult.correlationMatrix ? predictionResult.correlationMatrix : ''}
-                            </div>
-                        </div>
-                        <div class="aqi-by-location"> 
-                            {predictionResult.aqiByLocation ? predictionResult.aqiByLocation : ''}
-                        </div>
-                    </div>
-                </div>
-            : ''}
-
-            {modelID && modelType && predictionResult &&  predictionResult.type === "regression" ? 
-                <div class="regression-wrapper">
-                    <div class="row">
-                        <div class="col"> 
-                            <div class="aqi-percentage"> 
-                                {predictionResult.aqiPercantage ? predictionResult.aqiPercantage : ''}
-                            </div>
-                        </div>
-                        <div class="col"> 
-                            <div class="corr-matrix"> 
-                                {predictionResult.correlationMatrix ? predictionResult.correlationMatrix : ''}
-                            </div>
-                        </div>
-                        <div class="aqi-by-location"> 
-                            {predictionResult.aqiByLocation ? predictionResult.aqiByLocation : ''}
-                        </div>
-                        <div class="aqi-by-time"> 
-                            {predictionResult.aqiByTime ? predictionResult.aqiByTime : ''}
-                        </div>
-                    </div>
-                </div>
-            : ''}
-
-            {modelID && modelType && predictionResult ? 
-                <div class="one-row-select-wrapper">
-                    <button className="model-select model-select-type" onClick={downloadZip}>
-                        Download ZIP report
-                    </button>
-                </div>
+                        <DownloadButton filePath = {predictionResult.archiveFilePath} buttonText = {"Download ZIP report"}/>
+                    </>
+                    : ''}
+                </>
+                : ''}
+            </>
             : ''}
         </div>
     );

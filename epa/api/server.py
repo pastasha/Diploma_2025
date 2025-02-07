@@ -98,7 +98,8 @@ def start_eda():
             "emissionIndexPlots": edaObject.emissionIndexPlots,
             "correlationMatrixPlot": edaObject.correlationMatrixPlot,
             "zScorePlot": edaObject.zScorePlot,
-            "pairplotPlot": edaObject.pairplotPlot
+            "pairplotPlot": edaObject.pairplotPlot,
+            "archiveFilePath": edaObject.archiveFilePath
         }
         success = True
     except Exception as e:
@@ -167,17 +168,23 @@ def compare():
         if (req["modelType"] == "classification"):
             compareResultObj = compareClassification(user_id, app.root_path)
             compareResult["type"] = "classification"
+            compareResult["compareDfPath"] = compareResultObj.compareDfPath
+            compareResult["compareDfFull"] = compareResultObj.compareDfFull
             compareResult["forecastComparePlot"] = compareResultObj.forecastComparePlot
             compareResult["heatmapPlot"] = compareResultObj.heatmapPlot
             compareResult["aqiDistributionPlot"] = compareResultObj.aqiDistributionPlot
             compareResult["popularityPlot"] = compareResultObj.popularityPlot
+            compareResult["archiveFilePath"] = compareResultObj.archiveFilePath
         elif (req["modelType"] == "regression"):
             compareResultObj = compareRegression(user_id, app.root_path)
             compareResult["type"] = "regression"
+            compareResult["compareDfPath"] = compareResultObj.compareDfPath
+            compareResult["compareDfFull"] = compareResultObj.compareDfFull
             compareResult["boxplotPlot"] = compareResultObj.boxplotPlot
             compareResult["modelPredValuesPlot"] = compareResultObj.modelPredValuesPlot
             compareResult["corrMatrixPlot"] = compareResultObj.corrMatrixPlot
             compareResult["aqiForecastPlot"] = compareResultObj.aqiForecastPlot
+            compareResult["archiveFilePath"] = compareResultObj.archiveFilePath
         success = True
     except Exception as e:
         print(f"Couldn't process compare: {e}")
