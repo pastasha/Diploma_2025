@@ -71,7 +71,7 @@ render() {
         </section>
         <section>
           <div class="section-anchor" id="compare-section"></div>
-          <div class="section-wrapper hidden" id="predict">
+          <div class="section-wrapper hidden" id="compare">
             <h1>Compare</h1>
             <Compare />
           </div>
