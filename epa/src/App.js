@@ -79,7 +79,10 @@ render() {
       </main>
 
       <footer class="footer">
-        <h1>Footer</h1>
+        <div class="footer-wrapper">
+          <h4>@PolinaBohaichuk</h4>
+          <p>2025</p>
+        </div>
       </footer>
       </div>
     </HashRouter>
