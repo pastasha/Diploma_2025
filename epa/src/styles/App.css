@@ -36,3 +36,9 @@
     transform: rotate(360deg);
   }
 }
+
+section {
+  mark {
+    background-color: rgb(232, 248, 254);
+  }
+}

@@ -11,6 +11,7 @@ export default function Home() {
                     (<mark>PM2.5, PM10, O3, CO, SO2, NO2</mark>), <mark>Location</mark> and <mark>Date</mark>.
                 </p>
                 <p>The system will process the data, perform an in-depth analysis, and generate predictions. The results include visualizations, statistical insights, and air quality classifications, helping you monitor pollution levels and forecast trends.</p>
+                <p>As a result you are able to compare all the models you just process and see graphs with detailed info.</p>
                 <p>Please see the example of data to upload:</p>
                 <CsvToHtmlTable
                     data={file}

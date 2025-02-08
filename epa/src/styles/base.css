@@ -19,9 +19,12 @@ body {
 	margin: 0;
 }
 
+.section-anchor {
+	padding-top: 6rem;
+}
+
 .section-wrapper {
-	padding: 30px 20px 0 20px;
-	min-height: 100vh;
+	padding: 0 50px;
 }
 
 .header-img-wrapper,
@@ -156,7 +159,6 @@ body {
 
 .nav__items {
 	margin-top: 5px;
-
 }
 
 .brand .nav__link,
@@ -345,7 +347,7 @@ body {
 }
 
 .info-wrapper {
-	padding: 20px 100px;
+	padding: 0 50px;
 
 	p {
 		text-align: justify;

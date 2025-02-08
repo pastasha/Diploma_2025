@@ -7,12 +7,15 @@ import psycopg2
 from typing import Dict, List
 import psycopg2.extras as psql_extras
 from datetime import datetime, timedelta
+import os
+
 
 ALLOWED_EXTENSIONS = {"csv", "xml"}
 SESSION_DAYS = 7
 SESSION_MAX_AGE = SESSION_DAYS * 24 * 60 * 60
 USER_TABLE = "customer"
 ALL_USER_VALUES_QUERY = "SELECT * from " + USER_TABLE + ";"
+DATA_FILE_NAME = "/data.csv"
 
 # Generate a new user ID
 def generate_user_id():
@@ -132,3 +135,13 @@ def upsert_customer_to_db(
         cur.close()
     else:
         conn.commit()
+
+def getCustomerData(customer_folder):
+    try:
+        data_path = customer_folder + DATA_FILE_NAME
+        data = os.path.abspath(data_path)
+        dataframe = pd.read_csv(data)
+        return dataframe
+    except Exception as error:
+        print("- getCustomerData error:")
+        print(f" - {type(error).__name__}: {error}")

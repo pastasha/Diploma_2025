@@ -4,10 +4,14 @@ import psycopg2
 import pandas as pd
 from werkzeug.utils import secure_filename
 from flask import Flask, request, jsonify, make_response
-from utilities import *
+
+
+from helpers.dbHelper import *
 from classes.eda import ExploratoryDataAnalysis
 from classes.classification import Classification
 from classes.regression import Regression
+from classes.compareClassificationModels import compareClassification
+from classes.compareRegressionModels import compareRegression
 
 # Initializing flask app
 app = Flask(__name__)
@@ -47,7 +51,6 @@ def get_session():
         return response
 
     return jsonify({"message": "Existing session", "user_id": user_id})
-
 
 @app.route('/upload-data', methods=['POST'])
 def upload_file():
@@ -95,7 +98,8 @@ def start_eda():
             "emissionIndexPlots": edaObject.emissionIndexPlots,
             "correlationMatrixPlot": edaObject.correlationMatrixPlot,
             "zScorePlot": edaObject.zScorePlot,
-            "pairplotPlot": edaObject.pairplotPlot
+            "pairplotPlot": edaObject.pairplotPlot,
+            "archiveFilePath": edaObject.archiveFilePath
         }
         success = True
     except Exception as e:
@@ -149,6 +153,46 @@ def predict():
         "data": predictionResult
     })
 
+@app.route('/compare', methods=['POST'])
+def compare():
+    success = False
+    compareResult = None
+    try:
+        req = request.get_json(force=True)
+        user_id = request.cookies.get('user_id')
+        get_statement = "SELECT * from " + USER_TABLE + " WHERE user_id='" + user_id + "'"
+        col_names = get_column_names(USER_TABLE, cursor)
+        user_df = pd.DataFrame(columns=col_names)
+        user_df = get_data_from_db(get_statement, connection, cursor, user_df, col_names)[0][0]
+        compareResult = {}
+        if (req["modelType"] == "classification"):
+            compareResultObj = compareClassification(user_id, app.root_path)
+            compareResult["type"] = "classification"
+            compareResult["compareDfPath"] = compareResultObj.compareDfPath
+            compareResult["compareDfFull"] = compareResultObj.compareDfFull
+            compareResult["forecastComparePlot"] = compareResultObj.forecastComparePlot
+            compareResult["heatmapPlot"] = compareResultObj.heatmapPlot
+            compareResult["aqiDistributionPlot"] = compareResultObj.aqiDistributionPlot
+            compareResult["popularityPlot"] = compareResultObj.popularityPlot
+            compareResult["archiveFilePath"] = compareResultObj.archiveFilePath
+        elif (req["modelType"] == "regression"):
+            compareResultObj = compareRegression(user_id, app.root_path)
+            compareResult["type"] = "regression"
+            compareResult["compareDfPath"] = compareResultObj.compareDfPath
+            compareResult["compareDfFull"] = compareResultObj.compareDfFull
+            compareResult["boxplotPlot"] = compareResultObj.boxplotPlot
+            compareResult["modelPredValuesPlot"] = compareResultObj.modelPredValuesPlot
+            compareResult["corrMatrixPlot"] = compareResultObj.corrMatrixPlot
+            compareResult["aqiForecastPlot"] = compareResultObj.aqiForecastPlot
+            compareResult["archiveFilePath"] = compareResultObj.archiveFilePath
+        success = True
+    except Exception as e:
+        print(f"Couldn't process compare: {e}")
+    
+    return jsonify({
+        "success": success,
+        "data": compareResult
+    })
 
 # Running app
 if __name__ == '__main__':
