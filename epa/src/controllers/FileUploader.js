@@ -75,8 +75,9 @@ export function FileUploader() {
     return (
         <div>
             {/* Upload button */}
-            <button className="standard-upload" onClick={handleClick}>
-                Upload a file
+            <button id="uploadDataButton" className="standard-upload" onClick={handleClick}>
+                {fileName ? 'Upload another file'
+                : 'Upload a file'}
             </button>
             <input
                 type="file"
@@ -102,7 +103,7 @@ export function FileUploader() {
                         </thead>
                         <tbody>
                             {values.map((value, index) => { // eslint-disable-line
-                                if (index <= 50) {
+                                if (index < 5) {
                                     return (
                                         <tr key={index}> 
                                             {value.map((val, i) => {

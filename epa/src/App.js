@@ -51,28 +51,28 @@ render() {
         <section>
           <div class="section-anchor" id="upload-section"></div>
           <div class="section-wrapper" id="upload">
-            <h1>Upload data</h1>
+            <h1><mark>Upload data</mark></h1>
             <DataUpload />
           </div>
         </section>
         <section>
           <div class="section-anchor" id="analyze-section"></div>
           <div class="section-wrapper hidden" id="analyze">
-            <h1>Exploratory Data Analysis</h1>
+            <h1><mark>Exploratory Data Analysis</mark></h1>
             <EDA />
           </div>
         </section>
         <section>
           <div class="section-anchor" id="predict-section"></div>
           <div class="section-wrapper hidden" id="predict">
-            <h1>Predict</h1>
+            <h1><mark>Predict</mark></h1>
             <Predict />
           </div>
         </section>
         <section>
           <div class="section-anchor" id="compare-section"></div>
           <div class="section-wrapper hidden" id="compare">
-            <h1>Compare</h1>
+            <h1><mark>Compare</mark></h1>
             <Compare />
           </div>
         </section>
