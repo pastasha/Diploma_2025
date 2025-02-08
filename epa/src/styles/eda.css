@@ -1,0 +1,51 @@
+.one-row-plots{
+    display: table;
+    width: 100%; /*Optional*/
+    table-layout: fixed; /*Optional*/
+    border-spacing: 10px; /*Optional*/
+
+    .one-row-plot {
+        display: table-cell;
+    }
+}
+
+.data-distribution-plots {
+    .dd-plot {
+        img {
+            height: 200px;
+        }
+    }
+}
+
+.emission-index-plots {
+    display: grid;
+    grid-template-columns: auto auto;
+
+    .ei-plot {
+        font-size: 30px;
+        text-align: center;
+        img {
+            width: 650px;
+        }
+    }
+}
+
+.correlation-matrix-plot img{
+    height: 300px;
+}
+
+.z-score-plot img{
+    height: 300px;
+}
+
+.pairplot-plot img{
+    height: 1300px;
+}
+
+.class-distribution-plot img{
+    height: 400px;
+}
+
+.eda img {
+    width: 100%;
+}

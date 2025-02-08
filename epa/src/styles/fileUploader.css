@@ -1,0 +1,38 @@
+.standard-upload {
+    /* Reset OS-specfic / browser-specific default style (see https://ishadeed.com/article/styling-the-good-old-button/#the-default-styles) */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background: rgba(255, 255, 255); /* to be replaced with your custom design */
+    border: 1px solid currentColor; /* to be replaced with your custom design */
+    /* Signify interactivity */
+    border-radius: 4px; /* no physical button has a sharp corner; exact value to be replaced for your custom design */
+    cursor: pointer;
+    /* Match font style with the parent element */
+    font: inherit;
+    /* Make the button easy for touchscreen users to tap */
+    min-height: 48px;
+    min-width: 48px;
+
+    svg {
+        height: 25px;
+        width: 25px;
+        margin-right: 3px;
+    }
+}
+
+.standard-upload:focus {
+    outline-offset: 4px; /* make Chrome show a focus ring around the button */
+}
+
+.uploaded-file-wrapper {
+    text-align: left;
+    overflow-x: auto;
+}
+
+.df-col {
+    &:last-child {
+        background-color: rgb(222, 255, 222);
+        border-color: green;
+    }
+}
