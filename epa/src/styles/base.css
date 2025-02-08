@@ -83,6 +83,11 @@ body {
 	height: 150px;
 	background-color: var(--primary);
 	margin-top: 50px;
+
+	.footer-wrapper {
+		padding: 2.2rem;
+		color: rgb(232, 248, 254);
+	}
 }
 
 .header {
